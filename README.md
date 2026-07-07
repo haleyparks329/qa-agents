@@ -67,7 +67,7 @@ The original system design uses five agents:
 | Herbie | Scopes QA work and creates test plans | Prototype implemented through the CLI planner |
 | Mender | Investigates and repairs failing Playwright-style tests | Spec only; fingerprinting foundation exists |
 | Scout | Looks for exploratory bugs and risky behavior | Spec only |
-| Quill | Authors or updates tests from accepted plans | Prototype routing target; stubs are demo-only |
+| Quill | Authors or updates tests from accepted plans | Spec plus deterministic routing target; demo stubs only |
 | Auditor | Reviews QA coverage and agent behavior | Spec plus basic KB query surfaces |
 
 Agents share the same rules:
@@ -132,24 +132,24 @@ export QA_KB_PATH=/path/to/qa.db
 Implemented:
 
 - Python package and CLI
-- profile-aware QA plan generation
+- deterministic, profile-aware QA plan generation
 - generic `ecommerce` and `saas_dashboard` profiles
 - directory-based profile loading
 - flat JSON profile compatibility
 - profile inspection CLI
 - SQLite schema migration
-- basic KB stats and query commands
-- deterministic gap detection
-- stable failure fingerprinting
-- advisory gap routing
+- basic KB stats and SQL-backed query commands
+- deterministic gap detection for changed Python files, coverage JSON, and simple mutation-report JSON
+- stable error fingerprinting through normalized error text
+- advisory gap routing through deterministic gap-type-to-agent mapping
 - tests for the implemented foundations
 
-Prototype:
+Prototype slices:
 
-- Herbie-style planning from a simulated feature request
-- Playwright-style stubs as demo output
-- Quill/Auditor-style routing surfaces
-- KB review surfaces without a full dashboard
+- Herbie-inspired QA planning from a simulated feature request and application profile
+- Playwright-style test stubs as illustrative demo output only
+- deterministic recommendations that map detected gap types to the appropriate agent role
+- SQLite query commands for inspecting gaps, recurrences, blocked work, abstentions, and pending patches
 
 Planned:
 
