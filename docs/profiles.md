@@ -1,8 +1,19 @@
 # Profiles
 
-Profiles give the QA planner app context without hardcoding private repo details.
+Profiles give agents app context without hardcoding private repo details.
 
-Each profile lives in `profiles/<name>.json` and includes:
+## Implemented Format
+
+Each profile can live at:
+
+```text
+profiles/<name>/profile.json
+profiles/<name>/house-rules.md
+```
+
+The package also still reads the earlier flat JSON files, such as `profiles/ecommerce.json`, so the existing CLI demo remains compatible.
+
+Required fields:
 
 - `name`
 - `app_description`
@@ -11,26 +22,34 @@ Each profile lives in `profiles/<name>.json` and includes:
 - `test_priorities`
 - `constraints`
 
-## Included profiles
+Optional structured fields used by `profile.py`:
+
+- `repo_name`
+- `repo_root`
+- `test_layout`
+- `tools`
+- `issue_tracker`
+
+## Included Profiles
 
 ### ecommerce
 
-Use this profile for simulated storefront flows such as browsing, cart updates, promotions, checkout, and order confirmation.
-
-Primary risks include pricing accuracy, checkout interruptions, inventory state, promotion edge cases, and mobile checkout behavior.
+Generic simulated storefront context: catalog, cart, promotion, checkout, and order confirmation flows.
 
 ### saas_dashboard
 
-Use this profile for simulated dashboards where users filter records, inspect metrics, export reports, or manage workspace settings.
+Generic simulated dashboard context: role visibility, metrics, filters, exports, settings, empty states, and refresh behavior.
 
-Primary risks include role-based visibility, stale dashboard state, filter combinations, export formatting, and empty or error states.
+## Commands
 
-## Adding a profile
+```bash
+python3 profile.py list
+python3 profile.py --profile ecommerce show
+python3 profile.py --profile ecommerce agent-context herbie
+python3 profile.py --profile ecommerce get issue_tracker.ticket_prefixes
+python3 profile.py --profile ecommerce resolve-path test_layout.e2e
+```
 
-1. Copy an existing JSON profile.
-2. Rename it with a generic app category.
-3. Replace user flows, risks, priorities, and constraints.
-4. Run `pytest`.
-5. Run a demo command with the new profile.
+## Guardrails
 
 Profiles should not contain private company names, customer data, internal URLs, secrets, or production metrics.

@@ -11,3 +11,6 @@ build/
 .DS_Store
 *.log
 qa_plan_output.md
+*.db
+*.sqlite
+.agents-state/

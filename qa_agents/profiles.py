@@ -17,11 +17,15 @@ class ProfileError(ValueError):
 def available_profiles(profiles_dir: Path = DEFAULT_PROFILES_DIR) -> list[str]:
     if not profiles_dir.exists():
         return []
-    return sorted(path.stem for path in profiles_dir.glob("*.json"))
+    flat_profiles = {path.stem for path in profiles_dir.glob("*.json")}
+    directory_profiles = {
+        path.name for path in profiles_dir.iterdir() if (path / "profile.json").exists()
+    }
+    return sorted(flat_profiles | directory_profiles)
 
 
 def load_profile(name: str, profiles_dir: Path = DEFAULT_PROFILES_DIR) -> QAProfile:
-    profile_path = profiles_dir / f"{name}.json"
+    profile_path = profile_json_path(name, profiles_dir)
     if not profile_path.exists():
         known = ", ".join(available_profiles(profiles_dir)) or "none"
         raise ProfileError(f"Unknown profile '{name}'. Available profiles: {known}.")
@@ -53,3 +57,10 @@ def _string_list(value: object, field_name: str) -> list[str]:
     if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
         raise ProfileError(f"Profile field '{field_name}' must be a list of strings.")
     return value
+
+
+def profile_json_path(name: str, profiles_dir: Path = DEFAULT_PROFILES_DIR) -> Path:
+    directory_path = profiles_dir / name / "profile.json"
+    if directory_path.exists():
+        return directory_path
+    return profiles_dir / f"{name}.json"

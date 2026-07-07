@@ -1,45 +1,94 @@
 # Architecture
 
-`qa-agents` is built as a small deterministic pipeline.
+`qa-agents` is organized around a small agent system plus local state.
+
+## Implemented
+
+```text
+agents/
+  shared/
+    core-rules.md
+    house-rules.md
+  herbie.md
+  mender.md
+  scout.md
+  quill.md
+  auditor.md
+
+profiles/
+  ecommerce/
+    profile.json
+    house-rules.md
+  saas_dashboard/
+    profile.json
+    house-rules.md
+
+schema/
+  000_init.sql
+  001_digest.sql
+  002_perf_and_tracker.sql
+  003_ticket_id_compat.sql
+  004_gap_records.sql
+
+qa_agents/
+  cli.py
+  generator.py
+  parser.py
+  profiles.py
+  profile_config.py
+  kb.py
+  gap_detector.py
+  fingerprint.py
+```
+
+The current CLI planner follows this path:
 
 ```text
 Markdown feature request
         |
         v
-qa_agents.parser
+FeatureRequest
         |
         v
-FeatureRequest dataclass
+active QA profile
         |
         v
-qa_agents.profiles loads JSON profile
+deterministic planner
         |
         v
-qa_agents.generator combines feature + profile context
-        |
-        v
-TestPlan dataclass
-        |
-        v
-qa_agents.renderer emits Markdown
+Markdown test plan
 ```
 
-## Modules
+The KB/gap-detector path is separate:
 
-- `qa_agents.cli`: command-line interface and error handling.
-- `qa_agents.parser`: extracts a title, summary, and bullet requirements from Markdown.
-- `qa_agents.profiles`: loads and validates profile JSON.
-- `qa_agents.generator`: applies deterministic planning rules.
-- `qa_agents.renderer`: formats the plan as Markdown.
-- `qa_agents.models`: dataclasses shared across the pipeline.
+```text
+git diff / coverage JSON / mutation JSON
+        |
+        v
+gap_detector.py
+        |
+        v
+gap_records in SQLite
+        |
+        v
+kb.py route-gaps
+        |
+        v
+recommended agent + reason
+```
 
-## Design choices
+## Prototype
 
-- Keep profile context in JSON so it is easy to review and version.
-- Keep generated output deterministic so tests can assert behavior.
-- Keep the prototype local-first and dependency-light.
-- Make the demo honest: it plans tests, but it does not execute an app or claim production coverage.
+- Herbie is represented by deterministic test-plan generation.
+- Quill is represented by generic Playwright-style stubs and advisory routing targets.
+- Auditor is represented by KB query surfaces.
+- Mender has only the fingerprinting foundation.
 
-## Data boundary
+## Planned
 
-The project should only use simulated or generic data. Profiles should describe app categories, not private implementations.
+- Dashboard UI.
+- Slack or webhook digest.
+- Playwright failure healing.
+- Browser probing.
+- Automated agent orchestration.
+- Draft PR creation.

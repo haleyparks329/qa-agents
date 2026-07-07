@@ -1,0 +1,53 @@
+{
+  "name": "saas_dashboard",
+  "repo_name": "simulated-saas-dashboard",
+  "repo_root": ".",
+  "app_description": "A simulated business dashboard where users view metrics, filter tables, manage settings, and export reports.",
+  "key_user_flows": [
+    "sign in with a mock user role",
+    "scan dashboard summary cards",
+    "filter and sort tabular data",
+    "export a simulated report",
+    "update team or workspace settings"
+  ],
+  "risk_areas": [
+    "role-based access differences",
+    "stale or inconsistent dashboard state",
+    "filter combinations hiding important records",
+    "report export formatting",
+    "empty, loading, and error states"
+  ],
+  "test_priorities": [
+    "protect role-specific visibility rules",
+    "verify filters and exports against the same simulated dataset",
+    "cover empty and error states",
+    "check dashboard state after refresh"
+  ],
+  "constraints": [
+    "use simulated metrics and records only",
+    "do not imply real analytics accuracy",
+    "avoid private workspace names or customer data",
+    "keep assertions stable across repeated demo runs"
+  ],
+  "test_layout": {
+    "e2e": "tests/e2e",
+    "unit_or_integration": "tests",
+    "fixtures": "examples"
+  },
+  "tools": {
+    "coverage_reports": [
+      "coverage.json"
+    ],
+    "mutation_reports": [
+      "mutation-report.json"
+    ],
+    "heal_skill": "planned"
+  },
+  "issue_tracker": {
+    "type": "generic",
+    "ticket_prefixes": [
+      "QA",
+      "BUG"
+    ]
+  }
+}
