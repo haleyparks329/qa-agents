@@ -1,104 +1,199 @@
-# qa-agents
+# QA Agents
 
-`qa-agents` is public-safe QA agent infrastructure for scoping, auditing, gap detection, and test-plan authoring across software repos.
+A local-first QA agent system for turning messy software changes into clearer testing work.
 
-The current repo is intentionally local-first and deterministic. It preserves the original multi-agent architecture, but only implements the narrow foundations that can be tested honestly without private data, paid APIs, or a real production app.
+The project explores a simple idea: QA agents should not behave like generic test generators. They should understand the application context, follow shared rules, remember what happened before, and know when to act, abstain, or ask for help.
 
-All demo inputs are simulated. Profiles are generic app categories, not company-specific configurations.
+This repo is public-safe and uses only simulated examples. It does not contain private company data, production metrics, internal URLs, or customer information.
 
-## Implemented
+## What This Is
 
-- Python package and CLI demo: `python -m qa_agents ...`
-- Deterministic profile-aware test-plan generation
-- Generic profiles:
-  - `ecommerce`
-  - `saas_dashboard`
-- Agent specs in `agents/`:
-  - Herbie: QA scoper and planner
-  - Mender: Playwright healer, planned beyond fingerprinting
-  - Scout: exploratory bug-hunter, planned
-  - Quill: test author, prototype routing target
-  - Auditor: QA-for-QA reviewer, prototype KB queries
-- Shared agent rules in `agents/shared/`
-- Directory-based profile structure with `profile.json` and `house-rules.md`
-- `profile.py` CLI for profile inspection and agent context
-- SQLite KB migrations and helper CLI:
-  - `python3 kb.py migrate`
-  - `python3 kb.py stats`
-  - `python3 kb.py query gaps`
-  - `python3 kb.py route-gaps`
-- Stable error fingerprinting helper
-- Narrow deterministic gap detector:
-  - changed Python files
-  - coverage.py JSON missing lines
-  - simple mutation-report JSON survivors
-  - advisory routing, not auto-dispatch
-- Tests for the implemented foundations
+`qa-agents` is a prototype QA agent operating system.
 
-## Prototype
+It combines:
 
-- The CLI planner acts as Herbie's first public slice: it turns a simulated feature request and profile into a test plan.
-- Optional Playwright-style stubs are generic placeholders for Quill-style test authoring.
-- Gap routing recommends an agent, but it does not start that agent.
-- KB queries expose basic review surfaces, but they are not a full dashboard.
+- named QA agents with different responsibilities
+- reusable app profiles that provide context
+- shared rules for how agents should behave
+- a small SQLite knowledge base for runs, gaps, patches, and observations
+- deterministic gap detection and failure fingerprinting
+- a runnable Herbie prototype that generates profile-aware QA plans
 
-## Planned
+The goal is not to build a magic autonomous QA swarm. The goal is to make QA work more structured, reviewable, and context-aware.
 
-- Dashboard at `dashboard.py`
-- Slack or webhook digest from `digest.py`
-- Playwright healing and selector repair in Mender
-- Browser probing in Scout
-- Repo-aware test authoring in Quill
-- Automated orchestration between agents
-- Draft PR creation
-- Rich tracker integration
+## Why I Built This
 
-These are documented as design direction only unless code and tests exist in this repo.
+A lot of AI testing tools start from the same place:
 
-## Architecture
+> Here is a feature. Generate tests.
+
+That is useful, but it misses the part that usually makes QA hard.
+
+Different applications have different risks. A checkout flow, an analytics dashboard, and an internal admin tool should not be tested the same way. A good QA system needs context: important flows, known risk areas, test layout, house rules, and what has broken before.
+
+This project treats that context as part of the system.
+
+Profiles give agents reusable knowledge about the app. The KB gives them memory. Agent specs give them clear roles. Gap detection gives them signals. Routing gives the system a way to suggest who should look next without pretending everything should be automated.
+
+## System Model
 
 ```text
-agents/                 Agent specs and shared rules
-profiles/               Generic app profiles and profile rules
-schema/                 SQLite migrations
-qa_agents/              Python package implementation
-examples/               Simulated public demo inputs
-tests/                  Unit and CLI tests
-
-profile.py              Active-profile inspection CLI
-kb.py                   SQLite KB CLI
-gap_detector.py         Deterministic gap detector CLI
-fingerprint.py          Compatibility import for error fingerprints
+software change
+      |
+      v
+profile context + shared rules
+      |
+      v
+QA agents
+      |
+      v
+plans, gaps, observations, patches, fingerprints
+      |
+      v
+SQLite KB
+      |
+      v
+review, routing, follow-up work
 ```
 
-The KB file lives outside the repo at `$QA_KB_PATH` or `~/.agents-state/qa.db`.
+The current implementation is intentionally small. It implements the foundations that can be tested honestly in a public repo.
+
+## Agents
+
+The original system design uses five agents:
+
+| Agent | Role | Current status |
+|---|---|---|
+| Herbie | Scopes QA work and creates test plans | Prototype implemented through the CLI planner |
+| Mender | Investigates and repairs failing Playwright-style tests | Spec only; fingerprinting foundation exists |
+| Scout | Looks for exploratory bugs and risky behavior | Spec only |
+| Quill | Authors or updates tests from accepted plans | Prototype routing target; stubs are demo-only |
+| Auditor | Reviews QA coverage and agent behavior | Spec plus basic KB query surfaces |
+
+Agents share the same rules:
+
+- use the active profile before making recommendations
+- check KB state where relevant
+- keep outputs reviewable
+- prefer advisory routing over automatic dispatch
+- clearly report whether they acted, blocked, or abstained
+
+## Profiles
+
+Profiles are reusable QA context for an application or environment.
+
+A profile can describe:
+
+- what the app does
+- important user flows
+- risk areas
+- testing priorities
+- test layout
+- issue tracker hints
+- house rules
+- constraints agents should respect
+
+This repo includes two simulated profiles:
+
+```text
+profiles/ecommerce/
+profiles/saas_dashboard/
+```
+
+The older flat JSON profile format is still supported for compatibility.
+
+## Knowledge Base
+
+The KB is a local SQLite database used to track QA system state.
+
+It can store records such as:
+
+- agent runs
+- observations
+- gaps
+- patches
+- repeated failure fingerprints
+- blocked or abstained work
+
+By default, the DB lives outside the repo:
+
+```text
+~/.agents-state/qa.db
+```
+
+You can override it with:
+
+```bash
+export QA_KB_PATH=/path/to/qa.db
+```
+
+## What Works Today
+
+Implemented:
+
+- Python package and CLI
+- profile-aware QA plan generation
+- generic `ecommerce` and `saas_dashboard` profiles
+- directory-based profile loading
+- flat JSON profile compatibility
+- profile inspection CLI
+- SQLite schema migration
+- basic KB stats and query commands
+- deterministic gap detection
+- stable failure fingerprinting
+- advisory gap routing
+- tests for the implemented foundations
+
+Prototype:
+
+- Herbie-style planning from a simulated feature request
+- Playwright-style stubs as demo output
+- Quill/Auditor-style routing surfaces
+- KB review surfaces without a full dashboard
+
+Planned:
+
+- Mender Playwright healing
+- Scout browser probing
+- Quill repo-aware test writing
+- Auditor coverage review loops
+- dashboard
+- digest/webhook summaries
+- automated orchestration
+- draft PR creation
+
+Planned means planned. It is not claimed as working unless there is code and test coverage in this repo.
 
 ## Quick Start
 
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
-python -m pip install -e ".[dev]"
-pytest
+python3 -m pip install -e ".[dev]"
+.venv/bin/pytest
 ```
 
-## Demo: Generate A QA Plan
+## Run The Demo
+
+Generate a QA plan for a simulated ecommerce feature request:
 
 ```bash
-python -m qa_agents examples/feature_request.md --profile ecommerce
+python3 -m qa_agents examples/feature_request.md --profile ecommerce
 ```
 
 Include generic Playwright-style stubs:
 
 ```bash
-python -m qa_agents examples/feature_request.md --profile ecommerce --stubs
+python3 -m qa_agents examples/feature_request.md --profile ecommerce --stubs
 ```
 
-Write output to a file:
+Write the output to a file:
 
 ```bash
-python -m qa_agents examples/feature_request.md --profile ecommerce --stubs --output qa_plan_output.md
+python3 -m qa_agents examples/feature_request.md --profile ecommerce --stubs --output qa_plan_output.md
 ```
+
+The demo data is simulated. The stubs are examples, not proof of browser execution.
 
 ## Profile Commands
 
@@ -113,7 +208,11 @@ python3 profile.py --profile ecommerce get issue_tracker.ticket_prefixes
 python3 profile.py --profile ecommerce resolve-path test_layout.unit_or_integration
 ```
 
-Active profile resolution checks `QA_AGENTS_PROFILE`, then `QA_PROFILE`, then defaults to `ecommerce`.
+Active profile resolution checks:
+
+1. `QA_AGENTS_PROFILE`
+2. `QA_PROFILE`
+3. default: `ecommerce`
 
 ## KB Commands
 
@@ -133,7 +232,7 @@ Supported query surfaces:
 - `blocks`
 - `pending-patches`
 
-## Gap Detector
+## Gap Detection
 
 ```bash
 python3 gap_detector.py --base origin/main --head HEAD
@@ -143,12 +242,33 @@ python3 gap_detector.py --base origin/main --head HEAD --coverage coverage.json 
 
 Current behavior:
 
-- Emits `missing_unit_test` gaps for changed Python files.
-- Uses coverage JSON to narrow missing-unit gaps to files with missing lines.
-- Emits `surviving_mutant` gaps for loose mutation-report JSON shapes.
-- Optionally applies advisory routing with `--route`.
+- emits `missing_unit_test` gaps for changed Python files
+- uses coverage JSON to narrow missing-unit gaps to files with missing lines
+- emits `surviving_mutant` gaps from simple mutation-report JSON
+- optionally applies advisory routing with `--route`
+
+Routing is advisory. It recommends the next agent surface; it does not automatically dispatch work.
+
+## Repository Layout
+
+```text
+agents/                 Agent specs and shared rules
+docs/                   Architecture, agents, profiles, KB, demo notes
+examples/               Simulated public demo inputs
+profiles/               Generic app profiles and profile rules
+schema/                 SQLite migrations
+qa_agents/              Python package implementation
+tests/                  Unit and CLI tests
+
+profile.py              Active-profile inspection CLI
+kb.py                   SQLite KB CLI
+gap_detector.py         Deterministic gap detector CLI
+fingerprint.py          Compatibility import for error fingerprints
+```
 
 ## Agent Startup Pattern
+
+A future agent should start by loading context rather than guessing:
 
 ```bash
 python3 profile.py --profile ecommerce agent-context herbie
@@ -157,7 +277,7 @@ python3 kb.py stats
 python3 kb.py query gaps
 ```
 
-Agents should use profile context and KB state before making recommendations.
+The point is to make the agent's behavior traceable: which profile it used, what state it checked, what it decided, and whether it acted, blocked, or abstained.
 
 ## Adding A Profile
 
@@ -165,11 +285,29 @@ Agents should use profile context and KB state before making recommendations.
 2. Add `profiles/<name>/house-rules.md`.
 3. Keep terminology generic and public-safe.
 4. Add test layout, issue tracker, and tool hints as structured JSON when useful.
-5. Run `pytest`.
+5. Run `.venv/bin/pytest`.
+
+## Design Principles
+
+- Context first, generation second.
+- Agents should have narrow roles.
+- Shared rules matter more than clever prompts.
+- Memory should be explicit and inspectable.
+- Routing should be advisory until automation is proven.
+- `blocked` and `abstained` are valid outcomes.
+- Simulated demos should be clearly labeled.
 
 ## Guardrails
 
 - Use simulated data only.
 - Keep profiles generic.
 - Do not include private company names, customer data, secrets, internal URLs, or production metrics.
-- Do not claim dashboard, Slack digest, Playwright healing, or orchestration exists until it is implemented and tested.
+- Do not claim dashboard, digest, healing, browser probing, or orchestration exists until it is implemented and tested.
+
+## Project Status
+
+This is an early public prototype of a larger QA agent architecture.
+
+The useful part is not that it can print a test plan. The useful part is the system shape: profiles, agents, rules, KB state, gap signals, fingerprints, and reviewable routing.
+
+That is the part this repo is meant to explore.
