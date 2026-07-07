@@ -1,0 +1,30 @@
+{
+  "name": "ecommerce",
+  "app_description": "A simulated online storefront where shoppers browse products, manage carts, apply promotions, and complete checkout.",
+  "key_user_flows": [
+    "browse product catalog and filter results",
+    "add items to cart and edit quantities",
+    "apply a promotion or shipping option",
+    "complete checkout with a mock payment method",
+    "review order confirmation and receipt"
+  ],
+  "risk_areas": [
+    "cart totals and pricing accuracy",
+    "checkout interruptions or duplicate submissions",
+    "inventory state after cart changes",
+    "promotion edge cases",
+    "mobile checkout usability"
+  ],
+  "test_priorities": [
+    "protect checkout completion",
+    "verify pricing and totals before confirmation",
+    "cover recoverable validation errors",
+    "exercise mobile-width cart and checkout flows"
+  ],
+  "constraints": [
+    "use simulated products, users, carts, and payments only",
+    "do not assume access to real payment processors",
+    "avoid testing private customer data",
+    "prefer deterministic assertions over generated copy"
+  ]
+}
