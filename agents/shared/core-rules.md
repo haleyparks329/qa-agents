@@ -1,6 +1,6 @@
 # Core QA Agent Rules
 
-These rules are repo-agnostic and apply to every agent in this prototype.
+These rules are repo-agnostic and apply to every agent in this system.
 
 - Use the active profile for app context before making test recommendations.
 - Keep output grounded in available artifacts: feature requests, profile fields, KB records, coverage reports, mutation reports, and git diff data.

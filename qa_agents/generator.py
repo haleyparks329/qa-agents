@@ -114,7 +114,7 @@ def _risk_notes(feature: FeatureRequest, profile: QAProfile, source_text: str) -
     for constraint in profile.constraints[:2]:
         notes.append(f"Constraint to respect: {constraint}.")
     if "simulated" not in source_text:
-        notes.append("Demo note: this plan uses simulated data only; no production systems are assumed.")
+        notes.append("Prototype note: this plan uses simulated data only; no real app inspection is assumed.")
     if feature.requirements:
         notes.append(f"Requirement count parsed from input: {len(feature.requirements)}.")
     return notes

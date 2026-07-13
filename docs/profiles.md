@@ -11,7 +11,8 @@ profiles/<name>/profile.json
 profiles/<name>/house-rules.md
 ```
 
-The package also still reads the earlier flat JSON files, such as `profiles/ecommerce.json`, so the existing CLI demo remains compatible.
+The package also still reads the earlier flat JSON files, such as
+`profiles/ecommerce.json`, so the Herbie prototype remains compatible.
 
 Required fields:
 
@@ -34,11 +35,13 @@ Optional structured fields used by `profile.py`:
 
 ### ecommerce
 
-Generic simulated storefront context: catalog, cart, promotion, checkout, and order confirmation flows.
+Generic simulated storefront context: catalog, cart, promotion, checkout, and
+order confirmation flows.
 
 ### saas_dashboard
 
-Generic simulated dashboard context: role visibility, metrics, filters, exports, settings, empty states, and refresh behavior.
+Generic simulated dashboard context: role visibility, metrics, filters,
+exports, settings, empty states, and refresh behavior.
 
 ## Commands
 
@@ -52,4 +55,5 @@ python3 profile.py --profile ecommerce resolve-path test_layout.e2e
 
 ## Guardrails
 
-Profiles should not contain private company names, customer data, internal URLs, secrets, or production metrics.
+Profiles should not contain private company names, customer data, internal
+URLs, secrets, or production metrics.

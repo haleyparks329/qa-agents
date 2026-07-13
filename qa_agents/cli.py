@@ -13,7 +13,7 @@ from .renderer import render_markdown
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="qa-agents",
-        description="Generate a deterministic QA test plan from a simulated feature request.",
+        description="Run the public-safe Herbie prototype against a simulated feature request.",
     )
     parser.add_argument("feature_request", help="Path to a simulated Markdown feature request.")
     parser.add_argument(
@@ -29,7 +29,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--output",
         type=Path,
-        help="Optional path to write the Markdown test plan. Defaults to stdout.",
+        help="Optional path to write the prototype QA plan. Defaults to stdout.",
     )
     return parser
 

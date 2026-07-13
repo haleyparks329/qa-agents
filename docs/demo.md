@@ -1,8 +1,11 @@
 # Demo
 
-All demo data is simulated.
+All demo data is simulated and public-safe.
 
-## Implemented Planner Demo
+## Implemented: Herbie Prototype
+
+The runnable planner is a small Herbie slice. It exists to show profile-aware
+QA scoping without claiming full agent orchestration.
 
 ```bash
 python -m qa_agents examples/feature_request.md --profile ecommerce
@@ -20,13 +23,14 @@ Save the plan:
 python -m qa_agents examples/feature_request.md --profile ecommerce --stubs --output qa_plan_output.md
 ```
 
-## Implemented Profile Demo
+## Implemented: Profile Context
 
 ```bash
 python3 profile.py --profile ecommerce agent-context herbie
+python3 profile.py --profile ecommerce agent-context gap-detector
 ```
 
-## Implemented KB Demo
+## Implemented: KB And Gap Records
 
 ```bash
 export QA_KB_PATH=/tmp/qa-agents-demo.db
@@ -34,11 +38,12 @@ python3 kb.py migrate
 python3 kb.py stats
 python3 gap_detector.py --base origin/main --head HEAD --route
 python3 kb.py query gaps
+python3 kb.py route-gaps
 ```
 
 ## Prototype Output Shape
 
-The planner output includes:
+The Herbie prototype output includes:
 
 - selected profile
 - parsed feature summary and requirements
@@ -50,8 +55,8 @@ The planner output includes:
 
 ## Planned Demos
 
-- Live dashboard.
-- Slack digest.
+- Live dashboard or tracker.
+- Digest workflow.
 - Playwright healing.
 - Browser probing.
-- Automated multi-agent orchestration.
+- Automated multi-agent handoffs.

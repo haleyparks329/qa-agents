@@ -1,8 +1,10 @@
 # Architecture
 
-`qa-agents` is organized around a small agent system plus local state.
+`qa-agents` is organized as a small QA agent operating system plus local state.
+The deterministic planner is a prototype slice inside that system, not the
+system itself.
 
-## Implemented
+## Implemented Foundations
 
 ```text
 agents/
@@ -31,35 +33,36 @@ schema/
   004_gap_records.sql
 
 qa_agents/
+  kb.py
+  profile_config.py
+  fingerprint.py
+  gap_detector.py
   cli.py
   generator.py
   parser.py
   profiles.py
-  profile_config.py
-  kb.py
-  gap_detector.py
-  fingerprint.py
+  renderer.py
 ```
 
-The current CLI planner follows this path:
+## Core Data Flow
 
 ```text
-Markdown feature request
+active profile
         |
         v
-FeatureRequest
+agent startup context
         |
         v
-active QA profile
+agent spec + shared rules
         |
         v
-deterministic planner
+KB state: runs, observations, bugs, patches, gaps
         |
         v
-Markdown test plan
+explicit outcome: acted / blocked / abstained
 ```
 
-The KB/gap-detector path is separate:
+## Gap Flow
 
 ```text
 git diff / coverage JSON / mutation JSON
@@ -77,18 +80,31 @@ kb.py route-gaps
 recommended agent + reason
 ```
 
-## Prototype
+Routing is advisory. It records where a gap should probably go, but it does not
+dispatch work.
 
-- Herbie is represented by deterministic test-plan generation.
-- Quill is represented by generic Playwright-style stubs and advisory routing targets.
-- Auditor is represented by KB query surfaces.
-- Mender has only the fingerprinting foundation.
+## Prototype Slice
 
-## Planned
+```text
+simulated feature request
+        |
+        v
+profile-aware Herbie prototype
+        |
+        v
+Markdown QA plan
+```
 
-- Dashboard UI.
-- Slack or webhook digest.
-- Playwright failure healing.
-- Browser probing.
-- Automated agent orchestration.
-- Draft PR creation.
+This path is useful because it is runnable and testable, but it is deliberately
+small. It does not inspect a real app, heal tests, open PRs, or orchestrate the
+other agents.
+
+## Planned Workflows
+
+- Dashboard or tracker over KB state.
+- Digest workflow for open attention items.
+- Mender selector healing.
+- Scout browser probing.
+- Quill repo-aware test authoring.
+- Auditor drift review.
+- Agent handoff execution.
