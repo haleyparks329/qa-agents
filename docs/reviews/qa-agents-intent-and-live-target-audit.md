@@ -2,7 +2,7 @@
 
 ## 1. Executive Verdict
 
-`qa-agents` is not merely a set of agents that generate QA artifacts. The current repository is best understood as the foundation for an application-aware QA intelligence layer: profiles provide product context, agent specs define specialized QA roles, the SQLite KB defines durable memory, deterministic utilities detect and route narrow gap records, and the Herbie CLI demonstrates a small profile-aware planning slice.
+`qa-agents` is not merely a set of agents that generate QA artifacts. The current repository is best understood as the foundation for an application-aware QA intelligence layer: profiles provide product context, agent specs define specialized QA roles, the SQLite KB defines durable memory, deterministic utilities detect and route narrow gap records, and the Beacon CLI demonstrates a small profile-aware planning slice.
 
 The repo does not yet complete the intended evidence loop. It does not operate against a live application repository, execute real tests, observe product behavior, capture execution evidence, diagnose failures, or feed those results back into durable QA state. That absence is now the primary product blocker.
 
@@ -20,14 +20,14 @@ Until that loop exists, the repo proves thoughtful architecture and disciplined 
 
 The repo currently appears to be a public-safe QA agent operating-system prototype with:
 
-- Markdown role specifications for Herbie, Mender, Scout, Quill, and Auditor.
+- Markdown role specifications for Beacon, Patch, Lookout, Scribe, and Inspector.
 - Shared agent rules.
 - Generic application profiles for ecommerce and SaaS dashboard contexts.
 - A profile inspection CLI.
 - A SQLite knowledge-base schema and helper CLI.
 - Stable error fingerprinting.
 - A deterministic gap detector for changed Python files, coverage JSON, and mutation JSON.
-- A deterministic Herbie prototype that turns a simulated feature request into a QA plan and optional illustrative Playwright-style stubs.
+- A deterministic Beacon prototype that turns a simulated feature request into a QA plan and optional illustrative Playwright-style stubs.
 - Tests covering these implemented foundations.
 
 The executable center today is deterministic infrastructure, not autonomous agents.
@@ -47,7 +47,7 @@ The durable product is not any one agent. It is the combination of application m
 
 ### Where Implementation Has Drifted Toward Isolated Demos
 
-The working Herbie path starts from `examples/feature_request.md`, uses a generic profile, and generates a Markdown plan. It does not inspect a target repository or application behavior. The generated Playwright-style stubs explicitly require replacement with app-specific locators.
+The working Beacon path starts from `examples/feature_request.md`, uses a generic profile, and generates a Markdown plan. It does not inspect a target repository or application behavior. The generated Playwright-style stubs explicitly require replacement with app-specific locators.
 
 The gap detector can create routable records from diffs, coverage, and mutation reports, but those reports are not yet produced by an integrated application-under-test workflow.
 
@@ -64,7 +64,7 @@ The distinctive idea is not "AI writes tests." The distinctive idea is "QA agent
 ```text
 simulated feature request
 -> selected generic profile
--> deterministic Herbie-style plan
+-> deterministic Beacon-style plan
 -> optional illustrative test stubs
 ```
 
@@ -106,7 +106,7 @@ software change
 | --- | --- | --- |
 | Software change | Implemented but weakly connected | `gap_detector.py` can inspect git diff paths. There is no observed target app change scenario. |
 | Application context | Implemented and exercised | Directory profiles and `profile.py agent-context` work, but profiles are generic and point to `"repo_root": "."`. |
-| Risk analysis | Implemented in prototype | Herbie uses profile risks and keyword classification for simulated feature requests. |
+| Risk analysis | Implemented in prototype | Beacon uses profile risks and keyword classification for simulated feature requests. |
 | QA plan | Implemented and exercised | `python -m qa_agents ...` generates a deterministic Markdown plan. |
 | Test selection | Represented by prototype | Automation candidates are chosen, but not mapped to real existing tests. |
 | Test creation | Stub only | Playwright-style stubs are illustrative and not repo-aware. |
@@ -122,11 +122,11 @@ The missing operating loop is the gap between "we can model QA work" and "we can
 
 The current repo has the concepts needed to remember and route QA work, but it lacks the evidence source that would make those records meaningful. Without a target application:
 
-- Herbie cannot tie risks to real routes, components, APIs, or tests.
-- Quill cannot author or update real tests.
-- Mender cannot observe failing Playwright runs or propose selector repairs.
-- Scout cannot probe a running surface.
-- Auditor cannot compare intended coverage to actual coverage.
+- Beacon cannot tie risks to real routes, components, APIs, or tests.
+- Scribe cannot author or update real tests.
+- Patch cannot observe failing Playwright runs or propose selector repairs.
+- Lookout cannot probe a running surface.
+- Inspector cannot compare intended coverage to actual coverage.
 - The KB cannot accumulate trustworthy history beyond synthetic records.
 
 Yes: the absence of a live application-under-test is the primary blocker. The next blocker after that will be execution adapters: test runner invocation, artifact capture, and KB write contracts.
@@ -299,10 +299,10 @@ The profile should become the bridge between repos. QA Agents should not hardcod
 
 | Loop | Strength | Weakness |
 | --- | --- | --- |
-| Herbie plan -> Quill test -> Playwright execution -> KB result | Shows plan-to-test value | Requires repo-aware test authoring before execution evidence is solid. |
-| Failing test -> fingerprint -> Mender diagnosis -> reviewable patch | Very concrete | Patch generation and selector healing are easy to overbuild too soon. |
-| Git diff -> Auditor gap -> route -> Quill test | Good use of existing gap detector | Still risks stopping at routing without real execution. |
-| Profile-guided Scout mission -> browser evidence -> bug record | Strong demo | Browser exploration is open-ended and harder to make deterministic. |
+| Beacon plan -> Scribe test -> Playwright execution -> KB result | Shows plan-to-test value | Requires repo-aware test authoring before execution evidence is solid. |
+| Failing test -> fingerprint -> Patch diagnosis -> reviewable patch | Very concrete | Patch generation and selector healing are easy to overbuild too soon. |
+| Git diff -> Inspector gap -> route -> Scribe test | Good use of existing gap detector | Still risks stopping at routing without real execution. |
+| Profile-guided Lookout mission -> browser evidence -> bug record | Strong demo | Browser exploration is open-ended and harder to make deterministic. |
 
 ### Recommended First Loop
 
@@ -317,14 +317,14 @@ git diff in reference app
 -> route one reviewable next action
 ```
 
-This should be an Auditor/Herbie foundation loop, not a full Quill or Mender loop yet.
+This should be an Inspector/Beacon foundation loop, not a full Scribe or Patch loop yet.
 
 Why this loop first:
 
 - It uses the existing profile, KB, gap detector, and routing foundations.
 - It includes real execution and persistent evidence.
 - It avoids AI-authored tests until the system can observe reality.
-- It creates the minimum substrate Mender and Quill will later need.
+- It creates the minimum substrate Patch and Scribe will later need.
 - It can be deterministic enough for CI and portfolio demonstration.
 
 The first successful demo should end with a KB state that says something like:
@@ -334,7 +334,7 @@ Change touched pricing logic.
 Existing tests ran.
 Coverage report shows changed pricing lines uncovered.
 Gap record created: missing_unit_test app/pricing.py.
-Recommended agent: quill.
+Recommended agent: scribe.
 Reviewable next action: add pricing regression for quantity + discount ordering.
 ```
 
@@ -342,18 +342,18 @@ Reviewable next action: add pricing regression for quantity + discount ordering.
 
 | Agent | Trigger | Inputs | Deterministic responsibilities | AI-assisted responsibilities | Allowed outputs | Block/abstain conditions | KB reads | KB writes | Human boundary |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Herbie | Feature request, git change, ticket, planned release | Profile, diff summary, critical flows, past gaps | Load profile, map changed paths to risk areas, classify test types | Explain risk, draft QA plan, suggest test strategy | QA plan, risk summary, handoff recommendations | Missing profile, insufficient change context, no app mapping | gaps, prior observations, blocks, recurrences | agent_runs, observations, handoff_debt | Human accepts plan before test generation or patching |
-| Auditor | Scheduled audit, diff audit, coverage/mutation report, "check gaps" | Profile, KB, test inventory, coverage, mutation data | Detect changed files, uncovered lines, surviving mutants, stale open gaps | Interpret coverage meaning, prioritize gaps | gap_records, audit summary, route recommendations | No reports available, profile paths invalid, target repo missing | gaps, tests, patches, observations, agent_runs | gap_records, observations, agent_runs | Human decides whether to accept risk or route work |
-| Quill | Accepted QA plan, open gap, bug needing regression | Profile, plan, gap record, target test layout, existing tests | Locate test directories, preserve test framework conventions, run focused tests after edit | Draft or update tests, choose assertions | Test patch/draft, run result, blocked note | No runnable target repo, unclear expected behavior, unsafe fixture assumptions | gaps, bugs, prior test records | patches, tests, observations, agent_runs | Human reviews test changes before merge |
-| Mender | Failing E2E/API test, CI failure, selector rot | Failure output, trace/screenshot, profile, fingerprint history | Fingerprint failure, group recurrences, identify failing command/artifacts | Diagnose likely root cause, propose selector/app/test fix | Diagnosis, patch draft, bug suspect, abstention | Failure is product bug not test rot, missing trace, nondeterministic failure | bugs, recurrences, pending patches | bugs, patches, observations, agent_runs | Human approves patch, especially when app behavior changes |
-| Scout | Smoke/probe request, new feature surface, exploratory mission | Profile, running app URL, seed data, critical flows | Use bounded mission, capture reproduction steps and artifacts | Explore edge cases, identify suspicious behavior | bug suspect, evidence note, abstention | App unavailable, auth/seed data missing, mission too broad | bugs, prior observations, gaps | bugs, observations, agent_runs | Human confirms whether suspect is a bug |
+| Beacon | Feature request, git change, ticket, planned release | Profile, diff summary, critical flows, past gaps | Load profile, map changed paths to risk areas, classify test types | Explain risk, draft QA plan, suggest test strategy | QA plan, risk summary, handoff recommendations | Missing profile, insufficient change context, no app mapping | gaps, prior observations, blocks, recurrences | agent_runs, observations, handoff_debt | Human accepts plan before test generation or patching |
+| Inspector | Scheduled audit, diff audit, coverage/mutation report, "check gaps" | Profile, KB, test inventory, coverage, mutation data | Detect changed files, uncovered lines, surviving mutants, stale open gaps | Interpret coverage meaning, prioritize gaps | gap_records, audit summary, route recommendations | No reports available, profile paths invalid, target repo missing | gaps, tests, patches, observations, agent_runs | gap_records, observations, agent_runs | Human decides whether to accept risk or route work |
+| Scribe | Accepted QA plan, open gap, bug needing regression | Profile, plan, gap record, target test layout, existing tests | Locate test directories, preserve test framework conventions, run focused tests after edit | Draft or update tests, choose assertions | Test patch/draft, run result, blocked note | No runnable target repo, unclear expected behavior, unsafe fixture assumptions | gaps, bugs, prior test records | patches, tests, observations, agent_runs | Human reviews test changes before merge |
+| Patch | Failing E2E/API test, CI failure, selector rot | Failure output, trace/screenshot, profile, fingerprint history | Fingerprint failure, group recurrences, identify failing command/artifacts | Diagnose likely root cause, propose selector/app/test fix | Diagnosis, patch draft, bug suspect, abstention | Failure is product bug not test rot, missing trace, nondeterministic failure | bugs, recurrences, pending patches | bugs, patches, observations, agent_runs | Human approves patch, especially when app behavior changes |
+| Lookout | Smoke/probe request, new feature surface, exploratory mission | Profile, running app URL, seed data, critical flows | Use bounded mission, capture reproduction steps and artifacts | Explore edge cases, identify suspicious behavior | bug suspect, evidence note, abstention | App unavailable, auth/seed data missing, mission too broad | bugs, prior observations, gaps | bugs, observations, agent_runs | Human confirms whether suspect is a bug |
 
 ### Overlaps To Watch
 
-- Herbie and Auditor can both produce coverage recommendations. Herbie should plan from intent and risk; Auditor should evaluate evidence and drift.
-- Quill and Mender can both edit tests. Quill should create coverage/regression tests; Mender should repair failing tests or diagnose whether the app changed.
-- Scout and Auditor can both find gaps. Scout finds behavior through exploration; Auditor finds gaps through artifacts and history.
-- Mender must not silently turn product failures into test fixes. It should record an abstention or bug suspect when behavior appears genuinely broken.
+- Beacon and Inspector can both produce coverage recommendations. Beacon should plan from intent and risk; Inspector should evaluate evidence and drift.
+- Scribe and Patch can both edit tests. Scribe should create coverage/regression tests; Patch should repair failing tests or diagnose whether the app changed.
+- Lookout and Inspector can both find gaps. Lookout finds behavior through exploration; Inspector finds gaps through artifacts and history.
+- Patch must not silently turn product failures into test fixes. It should record an abstention or bug suspect when behavior appears genuinely broken.
 
 ## 9. Revised Architecture
 
@@ -391,7 +391,7 @@ routing/review layer
 - Execution adapters: run unit/API/E2E/coverage/mutation commands and normalize outputs.
 - Artifact store: stores or references reports, screenshots, traces, logs, coverage files, and generated plans.
 - QA knowledge base: records runs, observations, gaps, failures, fingerprints, patches, tests, handoffs, blocks, and abstentions.
-- Agent workers: Herbie, Auditor, Quill, Mender, Scout as bounded role-specific processors.
+- Agent workers: Beacon, Inspector, Scribe, Patch, Lookout as bounded role-specific processors.
 - Routing/review layer: turns state into reviewable next actions without automatic dispatch by default.
 
 ### Deterministic Versus LLM Responsibilities
@@ -436,8 +436,8 @@ Use LLMs where they add value:
 - No Playwright report, trace, screenshot, or coverage ingestion loop from a target app.
 - No persisted agent run lifecycle around a real QA task.
 - No repo-aware test authoring.
-- No Mender diagnosis or patch workflow.
-- No Scout browser probing.
+- No Patch diagnosis or patch workflow.
+- No Lookout browser probing.
 - No dashboard or review queue.
 - No proof that historical KB state improves later decisions.
 
@@ -500,7 +500,7 @@ Yes, if it becomes evidence-driven. The concept is strong and differentiated. Bu
 
 ### Phase 5: Add One Agent Capability
 
-- Add Quill only for one gap type: `missing_unit_test`.
+- Add Scribe only for one gap type: `missing_unit_test`.
 - Require a human-accepted expected behavior.
 - Write one focused regression test.
 - Run it.
@@ -508,7 +508,7 @@ Yes, if it becomes evidence-driven. The concept is strong and differentiated. Bu
 
 ### Phase 6: Add Failure Diagnosis
 
-- Add Mender for one failure type: selector/name drift in Playwright.
+- Add Patch for one failure type: selector/name drift in Playwright.
 - Fingerprint failures.
 - Distinguish test rot from product bug.
 - Produce reviewable patch or abstention.

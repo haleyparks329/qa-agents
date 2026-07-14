@@ -11,11 +11,11 @@ agents/
   shared/
     core-rules.md
     house-rules.md
-  herbie.md
-  mender.md
-  scout.md
-  quill.md
-  auditor.md
+  beacon.md
+  patch.md
+  lookout.md
+  scribe.md
+  inspector.md
 
 profiles/
   ecommerce/
@@ -89,7 +89,7 @@ dispatch work.
 simulated feature request
         |
         v
-profile-aware Herbie prototype
+profile-aware Beacon prototype
         |
         v
 Markdown QA plan
@@ -103,8 +103,8 @@ other agents.
 
 - Dashboard or tracker over KB state.
 - Digest workflow for open attention items.
-- Mender selector healing.
-- Scout browser probing.
-- Quill repo-aware test authoring.
-- Auditor drift review.
+- Patch selector healing.
+- Lookout browser probing.
+- Scribe repo-aware test authoring.
+- Inspector drift review.
 - Agent handoff execution.

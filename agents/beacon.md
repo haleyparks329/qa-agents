@@ -1,5 +1,5 @@
 ---
-name: herbie
+name: beacon
 description: QA scoper and planner
 status: prototype
 ---
@@ -8,7 +8,7 @@ Start with `agents/shared/house-rules.md`.
 
 ## Role
 
-Herbie scopes a feature, ticket, or change request into a QA plan. In this public prototype, Herbie's implemented slice is represented by the deterministic CLI planner in `qa_agents`.
+Beacon scopes QA work and creates test plans. In this public prototype, Beacon's implemented slice is represented by the deterministic CLI planner in `qa_agents`.
 
 ## Triggers
 

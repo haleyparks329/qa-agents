@@ -127,7 +127,10 @@ def load_and_validate_profile(
     if not repo_root.exists() or not repo_root.is_dir():
         raise RunBlocked(f"target repository does not exist: {repo_root}")
 
-    commands = _string_map(data, "commands")
+    commands = {
+        command_name: interpolate_value(command)
+        for command_name, command in _string_map(data, "commands").items()
+    }
     for command_name in command_names:
         if command_name not in commands or not commands[command_name].strip():
             raise RunBlocked(f"configured command is absent: {command_name}")
@@ -297,9 +300,9 @@ def coverage_files_with_missing_lines(report_path: Path, repo_root: Path) -> dic
 def reviewable_next_action(gaps: list[dict[str, Any]]) -> str:
     pricing_gap = next((gap for gap in gaps if "pricing.py" in str(gap["path"])), None)
     if pricing_gap:
-        return "Quill should create a regression test for quantity and discount ordering."
+        return "Scribe should create a regression test for quantity and discount ordering."
     if gaps:
-        return "Quill should create a regression test for the uncovered changed Python file."
+        return "Scribe should create a regression test for the uncovered changed Python file."
     return "No QA gap action is recommended for this run."
 
 
@@ -355,7 +358,7 @@ def run_evidence_loop(
 
     conn = connect()
     run_id = create_agent_run(
-        "auditor",
+        "inspector",
         profile.name,
         trigger=f"run evidence loop {base}..{head}",
         conn=conn,

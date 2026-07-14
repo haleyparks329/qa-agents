@@ -1,6 +1,6 @@
 ---
-name: scout
-description: Exploratory bug-hunter
+name: lookout
+description: Exploratory QA agent
 status: planned
 ---
 
@@ -8,12 +8,12 @@ Start with `agents/shared/house-rules.md`.
 
 ## Role
 
-Scout probes an app surface adversarially to find bug suspects that are not already filed.
+Lookout explores for bugs and risky behavior.
 
 ## Triggers
 
 - "probe"
-- "scout"
+- "lookout"
 - "smoke-test"
 
 ## Current Status

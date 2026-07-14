@@ -256,12 +256,12 @@ def list_open_gaps(conn: sqlite3.Connection | None = None) -> list[sqlite3.Row]:
 
 def route_gap_type(gap_type: str) -> tuple[str, str]:
     if gap_type in {"missing_unit_test", "surviving_mutant"}:
-        return "quill", "test authoring gap"
+        return "scribe", "test authoring gap"
     if gap_type in {"test_drift", "coverage_gap"}:
-        return "auditor", "coverage or drift review"
+        return "inspector", "coverage or drift review"
     if gap_type in {"playwright_failure", "selector_rot"}:
-        return "mender", "browser test repair"
-    return "herbie", "needs QA scoping"
+        return "patch", "browser test repair"
+    return "beacon", "needs QA scoping"
 
 
 def route_gaps(conn: sqlite3.Connection | None = None) -> list[sqlite3.Row]:

@@ -12,7 +12,7 @@ profiles/<name>/house-rules.md
 ```
 
 The package also still reads the earlier flat JSON files, such as
-`profiles/ecommerce.json`, so the Herbie prototype remains compatible.
+`profiles/ecommerce.json`, so the Beacon prototype remains compatible.
 
 Required fields:
 
@@ -48,7 +48,7 @@ exports, settings, empty states, and refresh behavior.
 ```bash
 python3 profile.py list
 python3 profile.py --profile ecommerce show
-python3 profile.py --profile ecommerce agent-context herbie
+python3 profile.py --profile ecommerce agent-context beacon
 python3 profile.py --profile ecommerce get issue_tracker.ticket_prefixes
 python3 profile.py --profile ecommerce resolve-path test_layout.e2e
 ```

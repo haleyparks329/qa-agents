@@ -5,13 +5,13 @@ in `agents/shared/`; profile-specific behavior belongs in `profiles/`.
 
 ## Status
 
-| Agent | Role | Current status |
+| Agent | Responsibility | Current status |
 | --- | --- | --- |
-| Herbie | Scope tickets, draft coverage matrices, draft regression tests | Prototype through deterministic CLI |
-| Mender | Heal failing browser tests | Planned beyond fingerprinting and advisory routing |
-| Scout | Probe targets adversarially | Planned |
-| Quill | Write tests from specs, bugs, or gaps | Prototype through stubs and routing target |
-| Auditor | Verify shipped work and find drift | Prototype through KB query surfaces |
+| Beacon | Scope QA work and create test plans | Prototype via deterministic CLI |
+| Patch | Investigate and repair failing browser tests | Planned beyond fingerprinting and routing foundations |
+| Lookout | Explore for bugs and risky behavior | Planned |
+| Scribe | Author or update tests from accepted plans, specs, bugs, or gaps | Prototype via stubs and routing target |
+| Inspector | Review coverage gaps and system behavior | Prototype via KB query surfaces |
 
 ## Shared Contract
 
@@ -27,12 +27,12 @@ Every agent should:
 ## Startup Pattern
 
 ```bash
-python3 profile.py --profile ecommerce agent-context herbie
+python3 profile.py --profile ecommerce agent-context beacon
 python3 profile.py --profile ecommerce resolve-path test_layout.unit_or_integration
 python3 kb.py stats
 python3 kb.py query gaps
 ```
 
 The current implementation provides the shared files, profile context, KB
-surfaces, fingerprints, and the Herbie prototype. Full autonomous agent
+surfaces, fingerprints, and the Beacon prototype. Full autonomous agent
 execution is planned.

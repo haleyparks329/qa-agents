@@ -23,11 +23,11 @@ The system is organized around five QA roles:
 
 | Agent | Responsibility | Current status |
 | --- | --- | --- |
-| Herbie | Scope QA work and create test plans | Prototype via deterministic CLI |
-| Mender | Investigate and repair failing browser tests | Planned beyond fingerprinting and routing foundations |
-| Scout | Explore for bugs and risky behavior | Planned |
-| Quill | Author or update tests from accepted plans, specs, bugs, or gaps | Prototype via stubs and routing target |
-| Auditor | Review coverage gaps and system behavior | Prototype via KB query surfaces |
+| Beacon | Scope QA work and create test plans | Prototype via deterministic CLI |
+| Patch | Investigate and repair failing browser tests | Planned beyond fingerprinting and routing foundations |
+| Lookout | Explore for bugs and risky behavior | Planned |
+| Scribe | Author or update tests from accepted plans, specs, bugs, or gaps | Prototype via stubs and routing target |
+| Inspector | Review coverage gaps and system behavior | Prototype via KB query surfaces |
 
 The larger design connects these roles through shared application context and a
 local knowledge base:
@@ -59,7 +59,7 @@ context-aware, inspectable, and explicit about what happened. Agents can
 
 ### Implemented
 
-- Agent spec files for Herbie, Mender, Scout, Quill, and Auditor.
+- Agent spec files for Beacon, Patch, Lookout, Scribe, and Inspector.
 - Shared repo-agnostic agent rules in `agents/shared/`.
 - Generic directory-based profiles with `profile.json` and `house-rules.md`.
 - Profile inspection CLI through `profile.py`.
@@ -74,18 +74,18 @@ context-aware, inspectable, and explicit about what happened. Agents can
 - Advisory gap routing with recommended agent and route reason.
 - Deterministic evidence runner foundation for profile-configured target repos,
   including command execution records, coverage ingestion, and gap routing.
-- Public-safe Herbie prototype CLI for turning a simulated feature request into
+- Public-safe Beacon prototype CLI for turning a simulated feature request into
   a QA plan.
 - Tests for the implemented foundations.
 
 ### Prototype
 
-- Herbie: deterministic profile-aware QA plan generation from simulated input.
-- Quill: optional generic Playwright-style stubs from the Herbie prototype and
+- Beacon: deterministic profile-aware QA plan generation from simulated input.
+- Scribe: optional generic Playwright-style stubs from the Beacon prototype and
   advisory routing target for test-authoring gaps.
-- Auditor: KB query surfaces that expose gaps, drift signals, blocked work, and
+- Inspector: KB query surfaces that expose gaps, drift signals, blocked work, and
   handoff debt.
-- Mender: failure fingerprinting and routing foundations, without automated
+- Patch: failure fingerprinting and routing foundations, without automated
   Playwright healing.
 - Gap routing: advisory only; it does not auto-dispatch agents.
 
@@ -93,10 +93,10 @@ context-aware, inspectable, and explicit about what happened. Agents can
 
 - Live tracker/dashboard over the KB.
 - Daily or scheduled digest workflow.
-- Automated Mender selector healing for failing Playwright tests.
-- Scout browser probing workflow.
-- Quill repo-aware test authoring from gaps, bugs, or specs.
-- Auditor weekly drift review workflow.
+- Automated Patch selector healing for failing Playwright tests.
+- Lookout browser probing workflow.
+- Scribe repo-aware test authoring from gaps, bugs, or specs.
+- Inspector weekly drift review workflow.
 - Agent orchestration and handoff execution.
 - Draft PR or tracker creation.
 - Richer gap types and mutation ingestion.
@@ -112,7 +112,7 @@ python3 -m pip install -e ".[dev]"
 .venv/bin/pytest
 ```
 
-Run the Herbie prototype:
+Run the Beacon prototype:
 
 ```bash
 python3 -m qa_agents examples/feature_request.md --profile ecommerce --stubs
@@ -151,20 +151,20 @@ command output.
 bakery application-under-test for the first real evidence loop. QA Agents runs
 against an actual Little Bytes git diff, executes the configured unit test
 command, reads the generated coverage report, persists a `missing_unit_test`
-gap, and recommends Quill for human-reviewed regression coverage.
+gap, and recommends Scribe for human-reviewed regression coverage.
 
 ```text
 Little Bytes pricing change
 -> passing tests
 -> uncovered changed behavior
 -> missing_unit_test gap
--> Quill recommendation
+-> Scribe recommendation
 ```
 
 The canonical public-safe replay artifact is
 [`examples/demo-runs/little-bytes-pricing.json`](examples/demo-runs/little-bytes-pricing.json).
 It is generated from normalized run evidence and sanitized for docs or website
-display. It is not proof that Quill executed: no tests, patches, PRs, browser
+display. It is not proof that Scribe executed: no tests, patches, PRs, browser
 runs, or LLM-authored summaries are generated in this phase.
 
 Regenerate the artifact:
@@ -189,11 +189,11 @@ agents/
   shared/
     core-rules.md       Repo-agnostic cross-agent context
     house-rules.md      Compatibility entrypoint for shared rules
-  herbie.md             QA scoper and planner
-  mender.md             Self-healer for failing browser tests
-  scout.md              Exploratory bug-hunter
-  quill.md              Test author
-  auditor.md            QA for QA: verifies shipped work and finds drift
+  beacon.md             QA scoper and planner
+  patch.md              Browser test repair agent
+  lookout.md            Exploratory QA agent
+  scribe.md             Test authoring agent
+  inspector.md          QA review agent
 
 profiles/
   ecommerce/
@@ -218,7 +218,7 @@ qa_agents/
   gap_detector.py       Artifact-driven gap detector
   run.py                Deterministic target-repo evidence runner
   demo_export.py        Public-safe evidence artifact exporter
-  cli.py                Small Herbie prototype runner
+  cli.py                Small Beacon prototype runner
   generator.py          Prototype QA plan generator
 ```
 
@@ -252,7 +252,7 @@ python3 profile.py list
 python3 profile.py show
 python3 profile.py summary
 python3 profile.py validate
-python3 profile.py agent-context auditor
+python3 profile.py agent-context inspector
 python3 profile.py repo-root
 python3 profile.py repo-name
 python3 profile.py tracker
@@ -355,7 +355,7 @@ field. Surviving states currently recognized: `survived`, `survivor`,
 Agents should resolve the active profile and inspect KB state before acting.
 
 ```bash
-python3 profile.py agent-context herbie
+python3 profile.py agent-context beacon
 python3 profile.py resolve-path test_layout.unit_or_integration
 python3 kb.py stats
 python3 kb.py query gaps
@@ -364,7 +364,7 @@ python3 kb.py query gaps
 Use `agent-context <agent>` when an agent needs structured startup context. Use
 the narrower commands when a shell script only needs one field.
 
-## Herbie Prototype Slice
+## Beacon Prototype Slice
 
 The deterministic planner is only a runnable prototype slice, not the center of
 the repository.

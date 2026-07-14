@@ -47,7 +47,7 @@
     "fixtures": "seed"
   },
   "commands": {
-    "unit": "python -m pytest backend/tests/unit --cov=backend/app --cov-report=json:artifacts/coverage/unit-coverage.json"
+    "unit": "${QA_PYTHON:-python3} -m pytest backend/tests/unit --cov=backend/app --cov-report=json:artifacts/coverage/unit-coverage.json"
   },
   "reports": {
     "coverage": "artifacts/coverage/unit-coverage.json"

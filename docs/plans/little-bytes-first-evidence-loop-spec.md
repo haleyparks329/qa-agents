@@ -24,7 +24,7 @@ The first implementation should prove that QA Agents can observe a real target r
 - Do not create the Little Bytes repository in this phase.
 - Do not implement the execution adapter in this phase.
 - Do not add AI-authored tests.
-- Do not expand Quill, Mender, Scout, or dashboard surfaces.
+- Do not expand Scribe, Patch, Lookout, or dashboard surfaces.
 - Do not build an AI bakery.
 - Do not build an autonomous agent dispatcher.
 - Do not auto-open pull requests or tracker tickets.
@@ -243,7 +243,7 @@ reports:
 gaps:
 - missing_unit_test backend/app/pricing.py
 recommended_next_action:
-Quill should create a regression test for quantity and discount ordering.
+Scribe should create a regression test for quantity and discount ordering.
 ```
 
 ## 6. Evidence Normalization
@@ -337,7 +337,7 @@ Gap records should reuse the existing `gap_records` table where practical:
 - `gap_type`: `missing_unit_test`
 - `path`: target-repo-relative path, such as `backend/app/pricing.py`
 - `detail`: short deterministic explanation
-- `recommended_agent`: `quill` after routing
+- `recommended_agent`: `scribe` after routing
 - `route_reason`: `test authoring gap`
 
 ### Artifact References
@@ -434,9 +434,9 @@ Little Bytes should contain deterministic scenario branches or patch fixtures:
 | Inventory: sold-out item still purchasable | Inventory risk and API validation | API/E2E failure or bug suspect in later phase. |
 | Coupons: discount stacking incorrectly | Coupon calculation risk | Unit/API failure or missing regression gap. |
 | Checkout: double-click creates duplicate order | Checkout completion and idempotency risk | E2E failure or bug suspect in later phase. |
-| Coverage: changed pricing function lacks regression coverage | First evidence-loop scenario | `missing_unit_test` routed to Quill. |
-| Mutation: expired coupon mutation survives | Mutation ingestion in later phase | `surviving_mutant` routed to Quill. |
-| Playwright: accessible name changes break selectors | Selector/test drift in later phase | `playwright_failure` routed to Mender. |
+| Coverage: changed pricing function lacks regression coverage | First evidence-loop scenario | `missing_unit_test` routed to Scribe. |
+| Mutation: expired coupon mutation survives | Mutation ingestion in later phase | `surviving_mutant` routed to Scribe. |
+| Playwright: accessible name changes break selectors | Selector/test drift in later phase | `playwright_failure` routed to Patch. |
 
 All scenarios must be replayable locally and in CI.
 
@@ -559,12 +559,12 @@ The first implementation is acceptable when:
 - The run CLI records start time, end time, duration, exit code, bounded output summaries, and artifact/report references.
 - Coverage JSON is ingested deterministically.
 - The pricing scenario creates one `missing_unit_test` gap for the changed pricing file.
-- `route-gaps` recommends `quill` with route reason `test authoring gap`.
-- The CLI prints or emits JSON with the reviewable next action: Quill should create a pricing regression test.
+- `route-gaps` recommends `scribe` with route reason `test authoring gap`.
+- The CLI prints or emits JSON with the reviewable next action: Scribe should create a pricing regression test.
 - Missing repo, invalid profile, missing command, timeout, missing report, command failure, and no relevant changes are covered by tests.
 - No tests are generated.
 - No patches are written.
-- No dashboard, Scout, Mender, or expanded Quill behavior is added.
+- No dashboard, Lookout, Patch, or expanded Scribe behavior is added.
 
 ## 13. Recommended Implementation Order
 
@@ -683,7 +683,7 @@ A later narrow use case may allow an LLM to turn normalized evidence into a huma
 - Adding or changing generated tests.
 - Applying patches.
 - Opening PRs or tracker tickets.
-- Expanding Quill, Mender, Scout, or dashboard behavior.
+- Expanding Scribe, Patch, Lookout, or dashboard behavior.
 - Treating a failing test as a product bug versus a test maintenance issue.
 
 ## 16. Risks And Unresolved Decisions

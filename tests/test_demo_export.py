@@ -114,7 +114,7 @@ def test_successful_little_bytes_demo_export_preserves_evidence(tmp_path, isolat
     assert artifact["evidence"]["coverage_report_found"] is True
     assert artifact["evidence"]["gap_type"] == "missing_unit_test"
     assert artifact["evidence"]["gap_path"] == "backend/app/pricing.py"
-    assert artifact["recommendation"]["agent"] == "quill"
+    assert artifact["recommendation"]["agent"] == "scribe"
     assert artifact["recommendation"]["route_reason"] == "test authoring gap"
     assert artifact["safety"]["tests_generated"] == 0
     assert artifact["safety"]["patches_generated"] == 0
@@ -199,6 +199,7 @@ def test_export_demo_cli_writes_valid_artifact(tmp_path, isolated_kb):
     env = {
         **os.environ,
         "QA_KB_PATH": str(isolated_kb),
+        "QA_PYTHON": shlex.quote(sys.executable),
         "QA_TARGET_REPO_ROOT": str(repo),
         "PYTHONPATH": str(Path(__file__).resolve().parents[1]),
     }

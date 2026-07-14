@@ -13,7 +13,7 @@ from .renderer import render_markdown
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="qa-agents",
-        description="Run the public-safe Herbie prototype against a simulated feature request.",
+        description="Run the public-safe Beacon prototype against a simulated feature request.",
     )
     parser.add_argument("feature_request", help="Path to a simulated Markdown feature request.")
     parser.add_argument(

@@ -14,7 +14,7 @@ authors = [{ name = "Haley Parks" }]
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "pytest-cov>=5.0"]
 
 [project.scripts]
 qa-agents = "qa_agents.cli:main"

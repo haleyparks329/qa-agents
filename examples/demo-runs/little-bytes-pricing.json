@@ -27,7 +27,7 @@
     "test_summary": "Configured unit tests passed and produced normalized coverage evidence."
   },
   "recommendation": {
-    "agent": "quill",
+    "agent": "scribe",
     "next_action": "Create a regression test for quantity and discount ordering.",
     "route_reason": "test authoring gap"
   },

@@ -1,6 +1,6 @@
 ---
-name: auditor
-description: QA for QA
+name: inspector
+description: QA review agent
 status: prototype
 ---
 
@@ -8,7 +8,7 @@ Start with `agents/shared/house-rules.md`.
 
 ## Role
 
-Auditor verifies shipped work, finds missing regressions, and detects drift between intended and actual QA coverage.
+Inspector reviews coverage gaps and system behavior.
 
 ## Triggers
 

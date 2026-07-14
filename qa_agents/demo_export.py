@@ -84,7 +84,7 @@ def observation_messages(conn: sqlite3.Connection, run_id: int) -> list[str]:
 def sanitized_next_action(message: str) -> str:
     if "quantity and discount ordering" in message.lower():
         return "Create a regression test for quantity and discount ordering."
-    return message.removeprefix("Quill should ").strip()
+    return message.removeprefix("Scribe should ").strip()
 
 
 def build_demo_artifact(
@@ -237,8 +237,8 @@ def validate_demo_artifact(artifact: dict[str, Any]) -> None:
     for key in ("tests_generated", "patches_generated", "agents_dispatched"):
         if not isinstance(safety.get(key), int):
             raise DemoExportError(f"safety.{key} must be numeric")
-    if artifact["recommendation"].get("agent") != "quill":
-        raise DemoExportError("demo recommendation must come from persisted Quill routing evidence")
+    if artifact["recommendation"].get("agent") != "scribe":
+        raise DemoExportError("demo recommendation must come from persisted Scribe routing evidence")
     if artifact["evidence"].get("gap_type") != "missing_unit_test":
         raise DemoExportError("demo evidence must preserve the missing_unit_test gap")
 

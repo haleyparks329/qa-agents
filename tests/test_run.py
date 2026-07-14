@@ -191,7 +191,7 @@ def test_no_relevant_changed_files_abstains(tmp_path, isolated_kb):
     assert summary["commands"] == []
 
 
-def test_successful_pricing_change_persists_execution_gap_and_quill_route(tmp_path, isolated_kb):
+def test_successful_pricing_change_persists_execution_gap_and_scribe_route(tmp_path, isolated_kb):
     repo = init_target_repo(tmp_path)
     write_command_script(repo, coverage_script())
     profiles_dir = make_profiles_dir(tmp_path, repo)
@@ -213,18 +213,18 @@ def test_successful_pricing_change_persists_execution_gap_and_quill_route(tmp_pa
             "path": "backend/app/pricing.py",
             "detail": "changed Python file has uncovered lines",
             "status": "open",
-            "recommended_agent": "quill",
+            "recommended_agent": "scribe",
             "route_reason": "test authoring gap",
         }
     ]
-    assert summary["recommended_next_action"] == "Quill should create a regression test for quantity and discount ordering."
+    assert summary["recommended_next_action"] == "Scribe should create a regression test for quantity and discount ordering."
 
     conn = connect(isolated_kb)
     records = list_execution_records(conn=conn)
     gaps = list_open_gaps(conn)
     assert records[0]["command_name"] == "unit"
     assert records[0]["status"] == "passed"
-    assert gaps[0]["recommended_agent"] == "quill"
+    assert gaps[0]["recommended_agent"] == "scribe"
 
 
 def test_failed_command_records_execution_and_exits_one(tmp_path, isolated_kb):

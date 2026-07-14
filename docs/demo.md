@@ -2,9 +2,9 @@
 
 All demo data is simulated and public-safe.
 
-## Implemented: Herbie Prototype
+## Implemented: Beacon Prototype
 
-The runnable planner is a small Herbie slice. It exists to show profile-aware
+The runnable planner is a small Beacon slice. It exists to show profile-aware
 QA scoping without claiming full agent orchestration.
 
 ```bash
@@ -26,7 +26,7 @@ python -m qa_agents examples/feature_request.md --profile ecommerce --stubs --ou
 ## Implemented: Profile Context
 
 ```bash
-python3 profile.py --profile ecommerce agent-context herbie
+python3 profile.py --profile ecommerce agent-context beacon
 python3 profile.py --profile ecommerce agent-context gap-detector
 ```
 
@@ -43,7 +43,7 @@ python3 kb.py route-gaps
 
 ## Prototype Output Shape
 
-The Herbie prototype output includes:
+The Beacon prototype output includes:
 
 - selected profile
 - parsed feature summary and requirements
