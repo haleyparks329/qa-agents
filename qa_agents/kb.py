@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sqlite3
 from pathlib import Path
@@ -72,6 +73,162 @@ def record_gap(
         ).fetchone()
         conn.commit()
         return int(row["id"])
+    finally:
+        if close:
+            conn.close()
+
+
+def create_agent_run(
+    agent: str,
+    profile: str,
+    trigger: str = "",
+    status: str = "running",
+    conn: sqlite3.Connection | None = None,
+) -> int:
+    close = conn is None
+    conn = conn or connect()
+    try:
+        migrate(conn)
+        cursor = conn.execute(
+            """
+            INSERT INTO agent_runs(agent, profile, trigger, status)
+            VALUES (?, ?, ?, ?)
+            """,
+            (agent, profile, trigger, status),
+        )
+        conn.commit()
+        return int(cursor.lastrowid)
+    finally:
+        if close:
+            conn.close()
+
+
+def finish_agent_run(
+    run_id: int,
+    status: str,
+    conn: sqlite3.Connection | None = None,
+) -> None:
+    close = conn is None
+    conn = conn or connect()
+    try:
+        migrate(conn)
+        conn.execute(
+            """
+            UPDATE agent_runs
+            SET status = ?, finished_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (status, run_id),
+        )
+        conn.commit()
+    finally:
+        if close:
+            conn.close()
+
+
+def record_observation(
+    kind: str,
+    message: str,
+    run_id: int | None = None,
+    conn: sqlite3.Connection | None = None,
+) -> int:
+    close = conn is None
+    conn = conn or connect()
+    try:
+        migrate(conn)
+        cursor = conn.execute(
+            """
+            INSERT INTO observations(run_id, kind, message)
+            VALUES (?, ?, ?)
+            """,
+            (run_id, kind, message),
+        )
+        conn.commit()
+        return int(cursor.lastrowid)
+    finally:
+        if close:
+            conn.close()
+
+
+def create_execution_record(
+    *,
+    run_id: int | None,
+    command_name: str,
+    command: str,
+    cwd: str,
+    status: str,
+    exit_code: int | None,
+    started_at: str,
+    finished_at: str | None,
+    duration_ms: int | None,
+    stdout_summary: str = "",
+    stderr_summary: str = "",
+    artifact_refs: list[dict[str, object]] | None = None,
+    report_refs: list[dict[str, object]] | None = None,
+    conn: sqlite3.Connection | None = None,
+) -> int:
+    close = conn is None
+    conn = conn or connect()
+    try:
+        migrate(conn)
+        cursor = conn.execute(
+            """
+            INSERT INTO execution_records(
+              run_id,
+              command_name,
+              command,
+              cwd,
+              status,
+              exit_code,
+              started_at,
+              finished_at,
+              duration_ms,
+              stdout_summary,
+              stderr_summary,
+              artifact_refs_json,
+              report_refs_json
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                run_id,
+                command_name,
+                command,
+                cwd,
+                status,
+                exit_code,
+                started_at,
+                finished_at,
+                duration_ms,
+                stdout_summary,
+                stderr_summary,
+                json.dumps(artifact_refs or [], sort_keys=True),
+                json.dumps(report_refs or [], sort_keys=True),
+            ),
+        )
+        conn.commit()
+        return int(cursor.lastrowid)
+    finally:
+        if close:
+            conn.close()
+
+
+def list_execution_records(
+    run_id: int | None = None,
+    conn: sqlite3.Connection | None = None,
+) -> list[sqlite3.Row]:
+    close = conn is None
+    conn = conn or connect()
+    try:
+        migrate(conn)
+        if run_id is None:
+            return list(conn.execute("SELECT * FROM execution_records ORDER BY created_at, id"))
+        return list(
+            conn.execute(
+                "SELECT * FROM execution_records WHERE run_id = ? ORDER BY created_at, id",
+                (run_id,),
+            )
+        )
     finally:
         if close:
             conn.close()

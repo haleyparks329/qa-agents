@@ -72,6 +72,8 @@ context-aware, inspectable, and explicit about what happened. Agents can
 - Narrow deterministic gap detector for changed Python files, coverage.py JSON,
   and simple mutation-report JSON.
 - Advisory gap routing with recommended agent and route reason.
+- Deterministic evidence runner foundation for profile-configured target repos,
+  including command execution records, coverage ingestion, and gap routing.
 - Public-safe Herbie prototype CLI for turning a simulated feature request into
   a QA plan.
 - Tests for the implemented foundations.
@@ -128,6 +130,21 @@ python3 -m qa_agents examples/feature_request.md \
 All demo data is simulated. Playwright-style stubs are illustrative output, not
 browser execution.
 
+Run the deterministic evidence-loop foundation:
+
+```bash
+export QA_TARGET_REPO_ROOT=../little-bytes
+python3 -m qa_agents run --profile little_bytes --base main --head HEAD
+```
+
+The companion Little Bytes reference repository lives at
+`haleyparks329/little-bytes`. Integration tests also exercise this runner with
+temporary fixture repositories. The runner executes configured evidence
+commands, ingests configured coverage reports, persists normalized execution
+records, creates routable gap records, and emits advisory next actions. It does
+not generate tests, dispatch agents, open PRs, or use an LLM to interpret raw
+command output.
+
 ## Architecture
 
 ```text
@@ -155,12 +172,14 @@ schema/
   002_perf_and_tracker.sql
   003_ticket_id_compat.sql
   004_gap_records.sql   Structured gap records
+  005_execution_records.sql
 
 qa_agents/
   kb.py                 SQLite helpers
   profile_config.py     Active profile context helpers
   fingerprint.py        Stable failure fingerprints
   gap_detector.py       Artifact-driven gap detector
+  run.py                Deterministic target-repo evidence runner
   cli.py                Small Herbie prototype runner
   generator.py          Prototype QA plan generator
 ```

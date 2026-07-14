@@ -1,0 +1,92 @@
+{
+  "name": "little_bytes",
+  "repo_name": "little-bytes",
+  "repo_root": "${QA_TARGET_REPO_ROOT:-../little-bytes}",
+  "app_description": "A small deterministic online bakery used as a QA Agents reference application.",
+  "key_user_flows": [
+    "browse bakery catalog",
+    "view product detail",
+    "add items to cart and update quantity",
+    "apply coupons",
+    "select pickup or delivery",
+    "complete checkout and view order confirmation"
+  ],
+  "risk_areas": [
+    "pricing accuracy",
+    "coupon calculations",
+    "inventory availability",
+    "pickup scheduling",
+    "checkout completion",
+    "cart persistence",
+    "order confirmation",
+    "accessibility",
+    "responsive checkout"
+  ],
+  "test_priorities": [
+    "protect pricing and coupon calculations",
+    "verify checkout completion",
+    "cover inventory and sold-out states",
+    "exercise accessible checkout controls"
+  ],
+  "constraints": [
+    "use deterministic seed data only",
+    "do not use real customer records",
+    "do not assume production payment or delivery integrations",
+    "keep assertions stable across repeated local and CI runs"
+  ],
+  "source_paths": {
+    "pricing": "backend/app/pricing.py",
+    "coupons": "backend/app/coupons.py",
+    "inventory": "backend/app/inventory.py",
+    "checkout": "backend/app/checkout.py"
+  },
+  "test_layout": {
+    "unit": "backend/tests/unit",
+    "api": "backend/tests/api",
+    "e2e": "frontend/tests/e2e",
+    "fixtures": "seed"
+  },
+  "commands": {
+    "unit": "python -m pytest backend/tests/unit --cov=backend/app --cov-report=json:artifacts/coverage/unit-coverage.json"
+  },
+  "reports": {
+    "coverage": "artifacts/coverage/unit-coverage.json"
+  },
+  "artifacts": {
+    "root": "artifacts",
+    "coverage": "artifacts/coverage"
+  },
+  "critical_flows": {
+    "coupon_apply": [
+      "backend/app/coupons.py",
+      "backend/app/pricing.py"
+    ],
+    "checkout_complete": [
+      "backend/app/checkout.py"
+    ]
+  },
+  "risk_area_mappings": {
+    "pricing accuracy": [
+      "backend/app/pricing.py"
+    ],
+    "coupon calculations": [
+      "backend/app/coupons.py",
+      "backend/app/pricing.py"
+    ],
+    "inventory availability": [
+      "backend/app/inventory.py"
+    ],
+    "checkout completion": [
+      "backend/app/checkout.py"
+    ]
+  },
+  "validation": {
+    "required_paths": [
+      "backend/app",
+      "backend/tests/unit"
+    ],
+    "required_reports_after_run": [
+      "artifacts/coverage/unit-coverage.json"
+    ]
+  }
+}
