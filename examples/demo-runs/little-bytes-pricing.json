@@ -1,0 +1,47 @@
+{
+  "application": {
+    "name": "Little Bytes",
+    "profile": "little_bytes",
+    "repository": "haleyparks329/little-bytes"
+  },
+  "change": {
+    "diff_excerpt": "diff --git a/backend/app/pricing.py b/backend/app/pricing.py\nindex 94c079b..2ac5dc3 100644\n--- a/backend/app/pricing.py\n+++ b/backend/app/pricing.py\n@@ -22,7 +22,12 @@ def calculate_total_cents(\n     \"\"\"Calculate totals in the intended order: subtotal first, then discount.\"\"\"\n     validate_quantity(quantity)\n     subtotal_cents = unit_price_cents * quantity\n-    discount_cents = calculate_discount_cents(subtotal_cents, discount_percent)\n+    if discount_percent:\n+        # Scenario branch: this applies the discount to one item only. Existing\n+        # tests still pass, but quantity-plus-discount behavior needs coverage.\n+        discount_cents = calculate_discount_cents(unit_price_cents, discount_percent)\n+    else:\n+        discount_cents = 0\n     total_cents = max(0, subtotal_cents - discount_cents)\n     return PriceBreakdown(\n         unit_price_cents=unit_price_cents,",
+    "diff_summary": "1 file changed, 6 insertions(+), 1 deletion(-)",
+    "files": [
+      "backend/app/pricing.py"
+    ]
+  },
+  "demo_id": "little-bytes-pricing-discount-order",
+  "evidence": {
+    "coverage_report_found": true,
+    "coverage_report_path": "artifacts/coverage/unit-coverage.json",
+    "gap_detail": "changed Python file has uncovered lines",
+    "gap_path": "backend/app/pricing.py",
+    "gap_type": "missing_unit_test"
+  },
+  "execution": {
+    "command_name": "unit",
+    "duration_ms": 0,
+    "exit_code": 0,
+    "status": "passed",
+    "test_summary": "Configured unit tests passed and produced normalized coverage evidence."
+  },
+  "recommendation": {
+    "agent": "quill",
+    "next_action": "Create a regression test for quantity and discount ordering.",
+    "route_reason": "test authoring gap"
+  },
+  "safety": {
+    "agents_dispatched": 0,
+    "human_review_required": true,
+    "patches_generated": 0,
+    "tests_generated": 0
+  },
+  "scenario": {
+    "base": "main",
+    "head": "scenario/pricing-discount-order",
+    "summary": "Pricing logic changed while the existing tests continued to pass."
+  },
+  "schema_version": 1,
+  "title": "Quantity and discount ordering"
+}

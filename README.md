@@ -145,6 +145,43 @@ records, creates routable gap records, and emits advisory next actions. It does
 not generate tests, dispatch agents, open PRs, or use an LLM to interpret raw
 command output.
 
+## Real Reference Application
+
+[Little Bytes](https://github.com/haleyparks329/little-bytes) is the controlled
+bakery application-under-test for the first real evidence loop. QA Agents runs
+against an actual Little Bytes git diff, executes the configured unit test
+command, reads the generated coverage report, persists a `missing_unit_test`
+gap, and recommends Quill for human-reviewed regression coverage.
+
+```text
+Little Bytes pricing change
+-> passing tests
+-> uncovered changed behavior
+-> missing_unit_test gap
+-> Quill recommendation
+```
+
+The canonical public-safe replay artifact is
+[`examples/demo-runs/little-bytes-pricing.json`](examples/demo-runs/little-bytes-pricing.json).
+It is generated from normalized run evidence and sanitized for docs or website
+display. It is not proof that Quill executed: no tests, patches, PRs, browser
+runs, or LLM-authored summaries are generated in this phase.
+
+Regenerate the artifact:
+
+```bash
+export QA_TARGET_REPO_ROOT=../little-bytes
+export QA_KB_PATH=/tmp/qa-agents-little-bytes-demo.db
+rm -f "$QA_KB_PATH"
+
+python3 -m qa_agents export-demo \
+  --profile little_bytes \
+  --base main \
+  --head scenario/pricing-discount-order \
+  --output examples/demo-runs/little-bytes-pricing.json \
+  --stable
+```
+
 ## Architecture
 
 ```text
@@ -180,6 +217,7 @@ qa_agents/
   fingerprint.py        Stable failure fingerprints
   gap_detector.py       Artifact-driven gap detector
   run.py                Deterministic target-repo evidence runner
+  demo_export.py        Public-safe evidence artifact exporter
   cli.py                Small Herbie prototype runner
   generator.py          Prototype QA plan generator
 ```
