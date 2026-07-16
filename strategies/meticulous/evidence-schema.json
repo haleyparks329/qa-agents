@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Simulated Deterministic Replay Evidence",
+  "type": "object",
+  "required": ["case_id", "source", "change", "replay_summary", "sessions"],
+  "properties": {
+    "case_id": { "type": "string" },
+    "source": {
+      "type": "object",
+      "required": ["type", "strategy", "simulated"],
+      "properties": {
+        "type": { "const": "simulated_replay_platform" },
+        "strategy": { "const": "meticulous" },
+        "simulated": { "const": true },
+        "disclaimer": { "type": "string" }
+      }
+    },
+    "change": {
+      "type": "object",
+      "required": ["title", "base_revision", "head_revision", "changed_files", "changed_branches"],
+      "properties": {
+        "title": { "type": "string" },
+        "base_revision": { "type": "string" },
+        "head_revision": { "type": "string" },
+        "changed_files": { "type": "array", "items": { "type": "string" } },
+        "changed_branches": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "replay_summary": {
+      "type": "object",
+      "required": ["sessions_evaluated", "sessions_selected", "sessions_affected"],
+      "properties": {
+        "sessions_evaluated": { "type": "integer" },
+        "sessions_selected": { "type": "integer" },
+        "sessions_affected": { "type": "integer" }
+      }
+    },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["session_id", "workflow_hint", "route_sequence", "covered_files", "covered_branches", "differences", "network_replay"],
+        "properties": {
+          "session_id": { "type": "string" },
+          "workflow_hint": { "type": "string" },
+          "route_sequence": { "type": "array", "items": { "type": "string" } },
+          "covered_files": { "type": "array", "items": { "type": "string" } },
+          "covered_branches": { "type": "array", "items": { "type": "string" } },
+          "differences": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["diff_id", "type", "location", "deterministic"],
+              "properties": {
+                "diff_id": { "type": "string" },
+                "type": { "enum": ["visual", "functional", "textual"] },
+                "location": { "type": "string" },
+                "base_value": { "type": "string" },
+                "head_value": { "type": "string" },
+                "deterministic": { "const": true },
+                "expected": { "type": "boolean" },
+                "severity": { "type": "string" },
+                "branch_refs": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          },
+          "network_replay": {
+            "type": "object",
+            "required": ["used", "stable"],
+            "properties": {
+              "used": { "type": "boolean" },
+              "stable": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

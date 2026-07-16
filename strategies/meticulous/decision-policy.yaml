@@ -1,0 +1,62 @@
+{
+  "clustering": {
+    "features": [
+      "workflow_hint",
+      "route_sequence"
+    ]
+  },
+  "classification_rules": [
+    {
+      "classification": "expected_change",
+      "expectation_required": true
+    },
+    {
+      "classification": "confirmed_regression",
+      "diff_type": "functional",
+      "severity": "regression"
+    }
+  ],
+  "summary": {
+    "next_actions": [
+      "Correct the one-cent rounding behavior.",
+      "Add or capture one canonical legacy-coupon prorated upgrade workflow.",
+      "Replay the affected checkout workflow cluster before reconsidering merge."
+    ]
+  },
+  "rules": [
+    {
+      "id": "confirmed-functional-regression",
+      "when": {
+        "confirmed_regressions_min": 1
+      },
+      "decision": "hold",
+      "priority": "critical"
+    },
+    {
+      "id": "uncovered-changed-branch",
+      "when": {
+        "uncovered_changed_branches_min": 1
+      },
+      "decision": "requires_human_review",
+      "priority": "high"
+    },
+    {
+      "id": "visual-only-expected-change",
+      "when": {
+        "functional_regressions": 0,
+        "all_visual_differences_expected": true,
+        "coverage_risk": "low"
+      },
+      "decision": "merge_with_acknowledged_change",
+      "priority": "normal"
+    },
+    {
+      "id": "deterministic-evidence-incomplete",
+      "when": {
+        "evidence_completeness_below": 0.75
+      },
+      "decision": "requires_human_review",
+      "priority": "high"
+    }
+  ]
+}

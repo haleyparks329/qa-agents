@@ -55,6 +55,20 @@ The goal is not a fully autonomous testing swarm. It is a QA system that is
 context-aware, inspectable, and explicit about what happened. Agents can
 `act`, `block`, or `abstain`, and routing is advisory rather than automatic.
 
+## Quality Strategies
+
+QA Agents can adapt their evidence model and decision rules to different
+software quality environments.
+
+Current strategies:
+
+- Default repository investigation
+- Meticulous-inspired deterministic replay investigation
+
+The Meticulous-inspired strategy is a simulated exploration based on public
+concepts. It demonstrates how agents can reason over replay evidence without
+replacing or weakening the deterministic execution layer.
+
 ## Status Summary
 
 ### Implemented

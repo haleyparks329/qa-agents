@@ -1,0 +1,239 @@
+{
+  "case_id": "pricing-change-001",
+  "change": {
+    "base_revision": "base-sha-simulated",
+    "changed_branches": [
+      "branch-annual-discount-label",
+      "branch-annual-rounding-total",
+      "branch-legacy-coupon-prorated-upgrade"
+    ],
+    "changed_files": [
+      "src/billing/pricing.ts",
+      "src/billing/discount-label.ts",
+      "src/billing/coupon-proration.ts"
+    ],
+    "head_revision": "head-sha-simulated",
+    "title": "Change annual-plan discount calculation"
+  },
+  "coverage_audit": {
+    "coverage_risk": "medium",
+    "missing_workflows": [
+      "legacy coupon plus prorated annual upgrade"
+    ],
+    "uncovered_changed_branches": [
+      "branch-legacy-coupon-prorated-upgrade"
+    ]
+  },
+  "findings": [
+    {
+      "branch_ids": [
+        "branch-annual-rounding-total"
+      ],
+      "classification": "confirmed_regression",
+      "diff_ids": [
+        "diff-001",
+        "diff-002"
+      ],
+      "diff_types": [
+        "functional"
+      ],
+      "finding_id": "finding-001",
+      "session_ids": [
+        "session-001",
+        "session-002"
+      ],
+      "summary": "One-cent total mismatch after annual discount calculation.",
+      "workflow_cluster_ids": [
+        "workflow-monthly-to-annual-subscription-upgrade"
+      ]
+    },
+    {
+      "branch_ids": [
+        "branch-annual-discount-label"
+      ],
+      "classification": "expected_change",
+      "diff_ids": [
+        "diff-003",
+        "diff-004",
+        "diff-005",
+        "diff-006",
+        "diff-007",
+        "diff-008",
+        "diff-009",
+        "diff-010",
+        "diff-011",
+        "diff-012",
+        "diff-013",
+        "diff-014",
+        "diff-015",
+        "diff-016",
+        "diff-017"
+      ],
+      "diff_types": [
+        "textual"
+      ],
+      "finding_id": "finding-002",
+      "session_ids": [
+        "session-003",
+        "session-004",
+        "session-005",
+        "session-006",
+        "session-007",
+        "session-008",
+        "session-009",
+        "session-010",
+        "session-011",
+        "session-012",
+        "session-013",
+        "session-014",
+        "session-015",
+        "session-016",
+        "session-017"
+      ],
+      "summary": "Expected annual discount summary copy update.",
+      "workflow_cluster_ids": [
+        "workflow-annual-plan-checkout-from-pricing-page",
+        "workflow-plan-comparison-annual-discount-review"
+      ]
+    }
+  ],
+  "human_decision_required": true,
+  "policy_decision": {
+    "decision": "hold",
+    "matched_rule": "confirmed-functional-regression",
+    "metrics": {
+      "all_visual_differences_expected": false,
+      "confirmed_regressions": 1,
+      "coverage_risk": "medium",
+      "evidence_completeness": 1.0,
+      "functional_regressions": 1,
+      "uncovered_changed_branches": 1
+    },
+    "priority": "critical"
+  },
+  "replay_summary": {
+    "sessions_affected": 17,
+    "sessions_evaluated": 2184,
+    "sessions_selected": 312
+  },
+  "source": {
+    "disclaimer": "Synthetic replay evidence for QA Agents demonstration only. Not an official integration and not produced by Meticulous.",
+    "simulated": true,
+    "strategy": "meticulous",
+    "type": "simulated_replay_platform"
+  },
+  "strategy": {
+    "disclaimer": "This strategy is based only on publicly documented concepts. It is not an official Meticulous integration or representation of Meticulous internal systems.",
+    "id": "meticulous",
+    "name": "Meticulous-Inspired Replay Strategy",
+    "version": 1
+  },
+  "summary": {
+    "affected_workflows": 3,
+    "confirmed_regressions": 1,
+    "coverage_gaps": 1,
+    "expected_changes": 1,
+    "next_actions": [
+      "Correct the one-cent rounding behavior.",
+      "Add or capture one canonical legacy-coupon prorated upgrade workflow.",
+      "Replay the affected checkout workflow cluster before reconsidering merge."
+    ],
+    "recommendation": "hold"
+  },
+  "workflow_clusters": [
+    {
+      "cluster_id": "workflow-annual-plan-checkout-from-pricing-page",
+      "confidence": 0.94,
+      "evidence_refs": [
+        "session-011",
+        "session-012",
+        "session-013",
+        "session-014",
+        "session-015",
+        "session-016",
+        "session-017"
+      ],
+      "name": "Annual plan checkout from pricing page",
+      "session_ids": [
+        "session-011",
+        "session-012",
+        "session-013",
+        "session-014",
+        "session-015",
+        "session-016",
+        "session-017"
+      ],
+      "shared_branches": [
+        "branch-annual-discount-label",
+        "branch-annual-rounding-total"
+      ],
+      "shared_differences": [
+        "textual|checkout.discount_summary|Annual discount: 10%|Annual discount: 12%"
+      ],
+      "shared_routes": [
+        "/checkout",
+        "/confirmation",
+        "/pricing"
+      ]
+    },
+    {
+      "cluster_id": "workflow-monthly-to-annual-subscription-upgrade",
+      "confidence": 0.94,
+      "evidence_refs": [
+        "session-001",
+        "session-002"
+      ],
+      "name": "Monthly to annual subscription upgrade",
+      "session_ids": [
+        "session-001",
+        "session-002"
+      ],
+      "shared_branches": [
+        "branch-annual-rounding-total"
+      ],
+      "shared_differences": [
+        "functional|annual-upgrade-rounding"
+      ],
+      "shared_routes": [
+        "/checkout",
+        "/confirmation",
+        "/settings/billing"
+      ]
+    },
+    {
+      "cluster_id": "workflow-plan-comparison-annual-discount-review",
+      "confidence": 0.94,
+      "evidence_refs": [
+        "session-003",
+        "session-004",
+        "session-005",
+        "session-006",
+        "session-007",
+        "session-008",
+        "session-009",
+        "session-010"
+      ],
+      "name": "Plan comparison annual discount review",
+      "session_ids": [
+        "session-003",
+        "session-004",
+        "session-005",
+        "session-006",
+        "session-007",
+        "session-008",
+        "session-009",
+        "session-010"
+      ],
+      "shared_branches": [
+        "branch-annual-discount-label"
+      ],
+      "shared_differences": [
+        "textual|pricing.annual_discount_badge|Save 10%|Save 12%"
+      ],
+      "shared_routes": [
+        "/pricing",
+        "/pricing/compare"
+      ]
+    }
+  ]
+}

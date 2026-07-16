@@ -1,0 +1,57 @@
+id: meticulous
+name: Meticulous-Inspired Replay Strategy
+version: 1
+
+description: >
+  A simulated quality strategy for investigating deterministic replay
+  evidence. It models how QA Agents could operate downstream of a
+  replay-first testing system.
+
+disclaimer: >
+  This strategy is based only on publicly documented concepts.
+  It is not an official Meticulous integration or representation
+  of Meticulous internal systems.
+
+quality_model: replay_first
+
+primary_goal: identify meaningful product regressions from deterministic replay evidence
+
+operating_principles:
+  - deterministic_evidence_before_probabilistic_reasoning
+  - cluster_sessions_into_user_workflows
+  - distinguish_expected_changes_from_regressions
+  - minimize_false_positive_escalations
+  - expose_missing_workflow_coverage
+  - preserve_human_merge_authority
+
+primary_evidence:
+  - code_change
+  - replay_session
+  - base_head_diff
+  - visual_diff
+  - functional_diff
+  - branch_coverage
+  - workflow_coverage
+  - network_replay_metadata
+
+secondary_evidence:
+  - existing_test_results
+  - browser_exploration
+  - repository_context
+
+prohibited_assumptions:
+  - every visual difference is a regression
+  - every affected session represents a distinct issue
+  - passing tests imply sufficient workflow coverage
+  - an unobserved workflow is safe
+  - probabilistic reasoning may override deterministic evidence
+
+outputs:
+  - affected_workflows
+  - clustered_differences
+  - expected_changes
+  - confirmed_regressions
+  - unresolved_risks
+  - coverage_gaps
+  - merge_recommendation
+  - confidence

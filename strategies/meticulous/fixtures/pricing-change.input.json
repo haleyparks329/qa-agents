@@ -1,0 +1,438 @@
+{
+  "case_id": "pricing-change-001",
+  "source": {
+    "type": "simulated_replay_platform",
+    "strategy": "meticulous",
+    "simulated": true,
+    "disclaimer": "Synthetic replay evidence for QA Agents demonstration only. Not an official integration and not produced by Meticulous."
+  },
+  "change": {
+    "title": "Change annual-plan discount calculation",
+    "base_revision": "base-sha-simulated",
+    "head_revision": "head-sha-simulated",
+    "changed_files": [
+      "src/billing/pricing.ts",
+      "src/billing/discount-label.ts",
+      "src/billing/coupon-proration.ts"
+    ],
+    "changed_branches": [
+      "branch-annual-discount-label",
+      "branch-annual-rounding-total",
+      "branch-legacy-coupon-prorated-upgrade"
+    ]
+  },
+  "replay_summary": {
+    "sessions_evaluated": 2184,
+    "sessions_selected": 312,
+    "sessions_affected": 17
+  },
+  "coverage": {
+    "branch_expectations": {
+      "branch-legacy-coupon-prorated-upgrade": "legacy coupon plus prorated annual upgrade"
+    }
+  },
+  "known_expectations": [
+    {
+      "id": "expect-annual-label-copy",
+      "summary": "Annual discount label intentionally changed from Save 10% to Save 12%."
+    }
+  ],
+  "constraints": [
+    "All data is simulated.",
+    "Visual and textual changes require explicit expectation evidence.",
+    "Human merge authority is preserved."
+  ],
+  "sessions": [
+    {
+      "session_id": "session-001",
+      "workflow_hint": "monthly to annual subscription upgrade",
+      "route_sequence": ["/settings/billing", "/checkout", "/confirmation"],
+      "covered_files": ["src/billing/pricing.ts"],
+      "covered_branches": ["branch-annual-rounding-total"],
+      "differences": [
+        {
+          "diff_id": "diff-001",
+          "type": "functional",
+          "location": "checkout.total",
+          "base_value": "$108.00",
+          "head_value": "$107.99",
+          "deterministic": true,
+          "severity": "regression",
+          "summary": "One-cent total mismatch after annual discount calculation.",
+          "root_cause_candidate": "annual-upgrade-rounding",
+          "branch_refs": ["branch-annual-rounding-total"]
+        }
+      ],
+      "visual_diff": { "present": false },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-002",
+      "workflow_hint": "monthly to annual subscription upgrade",
+      "route_sequence": ["/settings/billing", "/checkout", "/confirmation"],
+      "covered_files": ["src/billing/pricing.ts"],
+      "covered_branches": ["branch-annual-rounding-total"],
+      "differences": [
+        {
+          "diff_id": "diff-002",
+          "type": "functional",
+          "location": "confirmation.invoice_total",
+          "base_value": "$108.00",
+          "head_value": "$107.99",
+          "deterministic": true,
+          "severity": "regression",
+          "summary": "One-cent total mismatch after annual discount calculation.",
+          "root_cause_candidate": "annual-upgrade-rounding",
+          "branch_refs": ["branch-annual-rounding-total"]
+        }
+      ],
+      "visual_diff": { "present": false },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-003",
+      "workflow_hint": "plan comparison annual discount review",
+      "route_sequence": ["/pricing", "/pricing/compare"],
+      "covered_files": ["src/billing/discount-label.ts"],
+      "covered_branches": ["branch-annual-discount-label"],
+      "differences": [
+        {
+          "diff_id": "diff-003",
+          "type": "textual",
+          "location": "pricing.annual_discount_badge",
+          "base_value": "Save 10%",
+          "head_value": "Save 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount label copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "pricing.annual_discount_badge" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-004",
+      "workflow_hint": "plan comparison annual discount review",
+      "route_sequence": ["/pricing", "/pricing/compare"],
+      "covered_files": ["src/billing/discount-label.ts"],
+      "covered_branches": ["branch-annual-discount-label"],
+      "differences": [
+        {
+          "diff_id": "diff-004",
+          "type": "textual",
+          "location": "pricing.annual_discount_badge",
+          "base_value": "Save 10%",
+          "head_value": "Save 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount label copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "pricing.annual_discount_badge" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-005",
+      "workflow_hint": "plan comparison annual discount review",
+      "route_sequence": ["/pricing", "/pricing/compare"],
+      "covered_files": ["src/billing/discount-label.ts"],
+      "covered_branches": ["branch-annual-discount-label"],
+      "differences": [
+        {
+          "diff_id": "diff-005",
+          "type": "textual",
+          "location": "pricing.annual_discount_badge",
+          "base_value": "Save 10%",
+          "head_value": "Save 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount label copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "pricing.annual_discount_badge" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-006",
+      "workflow_hint": "plan comparison annual discount review",
+      "route_sequence": ["/pricing", "/pricing/compare"],
+      "covered_files": ["src/billing/discount-label.ts"],
+      "covered_branches": ["branch-annual-discount-label"],
+      "differences": [
+        {
+          "diff_id": "diff-006",
+          "type": "textual",
+          "location": "pricing.annual_discount_badge",
+          "base_value": "Save 10%",
+          "head_value": "Save 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount label copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "pricing.annual_discount_badge" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-007",
+      "workflow_hint": "plan comparison annual discount review",
+      "route_sequence": ["/pricing", "/pricing/compare"],
+      "covered_files": ["src/billing/discount-label.ts"],
+      "covered_branches": ["branch-annual-discount-label"],
+      "differences": [
+        {
+          "diff_id": "diff-007",
+          "type": "textual",
+          "location": "pricing.annual_discount_badge",
+          "base_value": "Save 10%",
+          "head_value": "Save 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount label copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "pricing.annual_discount_badge" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-008",
+      "workflow_hint": "plan comparison annual discount review",
+      "route_sequence": ["/pricing", "/pricing/compare"],
+      "covered_files": ["src/billing/discount-label.ts"],
+      "covered_branches": ["branch-annual-discount-label"],
+      "differences": [
+        {
+          "diff_id": "diff-008",
+          "type": "textual",
+          "location": "pricing.annual_discount_badge",
+          "base_value": "Save 10%",
+          "head_value": "Save 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount label copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "pricing.annual_discount_badge" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-009",
+      "workflow_hint": "plan comparison annual discount review",
+      "route_sequence": ["/pricing", "/pricing/compare"],
+      "covered_files": ["src/billing/discount-label.ts"],
+      "covered_branches": ["branch-annual-discount-label"],
+      "differences": [
+        {
+          "diff_id": "diff-009",
+          "type": "textual",
+          "location": "pricing.annual_discount_badge",
+          "base_value": "Save 10%",
+          "head_value": "Save 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount label copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "pricing.annual_discount_badge" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-010",
+      "workflow_hint": "plan comparison annual discount review",
+      "route_sequence": ["/pricing", "/pricing/compare"],
+      "covered_files": ["src/billing/discount-label.ts"],
+      "covered_branches": ["branch-annual-discount-label"],
+      "differences": [
+        {
+          "diff_id": "diff-010",
+          "type": "textual",
+          "location": "pricing.annual_discount_badge",
+          "base_value": "Save 10%",
+          "head_value": "Save 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount label copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "pricing.annual_discount_badge" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-011",
+      "workflow_hint": "annual plan checkout from pricing page",
+      "route_sequence": ["/pricing", "/checkout", "/confirmation"],
+      "covered_files": ["src/billing/discount-label.ts", "src/billing/pricing.ts"],
+      "covered_branches": ["branch-annual-discount-label", "branch-annual-rounding-total"],
+      "differences": [
+        {
+          "diff_id": "diff-011",
+          "type": "textual",
+          "location": "checkout.discount_summary",
+          "base_value": "Annual discount: 10%",
+          "head_value": "Annual discount: 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount summary copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "checkout.discount_summary" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-012",
+      "workflow_hint": "annual plan checkout from pricing page",
+      "route_sequence": ["/pricing", "/checkout", "/confirmation"],
+      "covered_files": ["src/billing/discount-label.ts", "src/billing/pricing.ts"],
+      "covered_branches": ["branch-annual-discount-label", "branch-annual-rounding-total"],
+      "differences": [
+        {
+          "diff_id": "diff-012",
+          "type": "textual",
+          "location": "checkout.discount_summary",
+          "base_value": "Annual discount: 10%",
+          "head_value": "Annual discount: 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount summary copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "checkout.discount_summary" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-013",
+      "workflow_hint": "annual plan checkout from pricing page",
+      "route_sequence": ["/pricing", "/checkout", "/confirmation"],
+      "covered_files": ["src/billing/discount-label.ts", "src/billing/pricing.ts"],
+      "covered_branches": ["branch-annual-discount-label", "branch-annual-rounding-total"],
+      "differences": [
+        {
+          "diff_id": "diff-013",
+          "type": "textual",
+          "location": "checkout.discount_summary",
+          "base_value": "Annual discount: 10%",
+          "head_value": "Annual discount: 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount summary copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "checkout.discount_summary" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-014",
+      "workflow_hint": "annual plan checkout from pricing page",
+      "route_sequence": ["/pricing", "/checkout", "/confirmation"],
+      "covered_files": ["src/billing/discount-label.ts", "src/billing/pricing.ts"],
+      "covered_branches": ["branch-annual-discount-label", "branch-annual-rounding-total"],
+      "differences": [
+        {
+          "diff_id": "diff-014",
+          "type": "textual",
+          "location": "checkout.discount_summary",
+          "base_value": "Annual discount: 10%",
+          "head_value": "Annual discount: 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount summary copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "checkout.discount_summary" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-015",
+      "workflow_hint": "annual plan checkout from pricing page",
+      "route_sequence": ["/pricing", "/checkout", "/confirmation"],
+      "covered_files": ["src/billing/discount-label.ts", "src/billing/pricing.ts"],
+      "covered_branches": ["branch-annual-discount-label", "branch-annual-rounding-total"],
+      "differences": [
+        {
+          "diff_id": "diff-015",
+          "type": "textual",
+          "location": "checkout.discount_summary",
+          "base_value": "Annual discount: 10%",
+          "head_value": "Annual discount: 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount summary copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "checkout.discount_summary" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-016",
+      "workflow_hint": "annual plan checkout from pricing page",
+      "route_sequence": ["/pricing", "/checkout", "/confirmation"],
+      "covered_files": ["src/billing/discount-label.ts", "src/billing/pricing.ts"],
+      "covered_branches": ["branch-annual-discount-label", "branch-annual-rounding-total"],
+      "differences": [
+        {
+          "diff_id": "diff-016",
+          "type": "textual",
+          "location": "checkout.discount_summary",
+          "base_value": "Annual discount: 10%",
+          "head_value": "Annual discount: 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount summary copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "checkout.discount_summary" },
+      "network_replay": { "used": true, "stable": true }
+    },
+    {
+      "session_id": "session-017",
+      "workflow_hint": "annual plan checkout from pricing page",
+      "route_sequence": ["/pricing", "/checkout", "/confirmation"],
+      "covered_files": ["src/billing/discount-label.ts", "src/billing/pricing.ts"],
+      "covered_branches": ["branch-annual-discount-label", "branch-annual-rounding-total"],
+      "differences": [
+        {
+          "diff_id": "diff-017",
+          "type": "textual",
+          "location": "checkout.discount_summary",
+          "base_value": "Annual discount: 10%",
+          "head_value": "Annual discount: 12%",
+          "deterministic": true,
+          "expected": true,
+          "expectation_id": "expect-annual-label-copy",
+          "summary": "Expected annual discount summary copy update.",
+          "branch_refs": ["branch-annual-discount-label"]
+        }
+      ],
+      "visual_diff": { "present": true, "location": "checkout.discount_summary" },
+      "network_replay": { "used": true, "stable": true }
+    }
+  ]
+}
