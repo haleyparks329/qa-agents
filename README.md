@@ -69,6 +69,10 @@ The Meticulous-inspired strategy is a simulated exploration based on public
 concepts. It demonstrates how agents can reason over replay evidence without
 replacing or weakening the deterministic execution layer.
 
+For the design rationale behind profiles, strategies, evidence handling,
+workflow clustering, and policy-constrained decisions, see
+[Quality Strategy Architecture](docs/strategy-architecture.md).
+
 ## Status Summary
 
 ### Implemented
