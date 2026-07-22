@@ -1,0 +1,54 @@
+name: Personal website evidence
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: personal-website-evidence
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: [self-hosted, macOS]
+    timeout-minutes: 15
+    env:
+      QA_TARGET_REPO_ROOT: ${{ vars.QA_TARGET_REPO_ROOT }}
+      QA_KB_PATH: ${{ vars.QA_KB_PATH }}
+      QA_PUBLIC_ARTIFACT_OUTPUT: ${{ vars.QA_PUBLIC_ARTIFACT_OUTPUT }}
+    steps:
+      - name: Checkout QA Agents
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install QA Agents
+        run: python -m pip install .
+
+      - name: Validate runner configuration
+        shell: bash
+        run: |
+          : "${QA_TARGET_REPO_ROOT:?Configure the QA_TARGET_REPO_ROOT repository variable}"
+          : "${QA_KB_PATH:?Configure the QA_KB_PATH repository variable}"
+          : "${QA_PUBLIC_ARTIFACT_OUTPUT:?Configure the QA_PUBLIC_ARTIFACT_OUTPUT repository variable}"
+          test -d "$QA_TARGET_REPO_ROOT" || {
+            echo "::error::QA_TARGET_REPO_ROOT is not a directory"
+            exit 2
+          }
+
+      - name: Collect and export website evidence
+        run: |
+          python -m qa_agents export-public \
+            --profile personal_website \
+            --base main \
+            --head HEAD \
+            --command website_validation \
+            --stable

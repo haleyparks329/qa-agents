@@ -217,6 +217,28 @@ export QA_KB_PATH=/tmp/qa-agents-personal-website.db
   --stable
 ```
 
+### Self-hosted evidence automation
+
+`.github/workflows/website-evidence.yml` runs the same deterministic export after pushes to `main` or a manual `workflow_dispatch`. It requires a persistent macOS self-hosted runner at version 2.329.0 or newer (for the Node 24-based action versions) and does not install, register, or administer that runner.
+
+Configure these GitHub Actions repository variables:
+
+- `QA_TARGET_REPO_ROOT`: absolute path to the persistent website checkout.
+- `QA_KB_PATH`: absolute path to the SQLite evidence database outside either public repository.
+- `QA_PUBLIC_ARTIFACT_OUTPUT`: absolute destination for the public JSON artifact. For the portfolio, use `<website>/src/data/qa-agents/latest.json` so Astro can import it during a build.
+
+A recommended runner layout is:
+
+```text
+~/Projects/
+  QA Agents/                  workflow checkout managed by GitHub Actions
+  haleyparks329.github.io/    persistent external target repository
+~/Library/Application Support/QA Agents/
+  qa.db                       persistent inspectable evidence
+```
+
+The workflow checks out and installs QA Agents, but it does not duplicate runner logic in YAML. QA Agents validates the external repository, persists raw inspectable execution evidence, and atomically replaces the public artifact only after a complete valid export. A validation or export failure exits nonzero and leaves the prior valid artifact untouched. The workflow does not commit, push, deploy, interpret evidence with an LLM, or modify website source beyond the configured generated JSON destination.
+
 ## Architecture
 
 ```text

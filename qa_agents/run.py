@@ -68,8 +68,13 @@ def bounded(text: str, limit: int = MAX_OUTPUT_CHARS) -> str:
 def interpolate_value(value: str) -> str:
     def replace(match: re.Match[str]) -> str:
         env_name = match.group(1)
-        fallback = match.group(2) or ""
-        return os.getenv(env_name, fallback)
+        configured = os.getenv(env_name)
+        if configured:
+            return configured
+        fallback = match.group(2)
+        if fallback is not None:
+            return fallback
+        raise RunBlocked(f"required environment variable is missing: {env_name}")
 
     return INTERPOLATION_RE.sub(replace, value)
 

@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +16,41 @@ from .run import RunBlocked, load_and_validate_profile, run_evidence_loop
 
 PUBLIC_SCHEMA_VERSION = "1.0"
 MAX_PUBLIC_ARTIFACT_BYTES = 20_000
+PUBLIC_OUTPUT_ENV_VAR = "QA_PUBLIC_ARTIFACT_OUTPUT"
+
+
+def resolve_public_output(output: Path | None) -> Path:
+    configured = output or (Path(value) if (value := os.getenv(PUBLIC_OUTPUT_ENV_VAR)) else None)
+    if configured is None:
+        raise DemoExportError(
+            f"public artifact output is required; pass --output or set {PUBLIC_OUTPUT_ENV_VAR}"
+        )
+    resolved = configured.expanduser()
+    if resolved.exists() and resolved.is_dir():
+        raise DemoExportError(f"public artifact output must be a file, not a directory: {resolved}")
+    if resolved.suffix.lower() != ".json":
+        raise DemoExportError("public artifact output must use a .json extension")
+    if resolved.parent.exists() and not resolved.parent.is_dir():
+        raise DemoExportError(f"public artifact parent is not a directory: {resolved.parent}")
+    return resolved
+
+
+def write_public_artifact(output: Path, artifact: dict[str, Any]) -> None:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    encoded = json.dumps(artifact, indent=2, sort_keys=True) + "\n"
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=output.parent, prefix=f".{output.name}.", delete=False
+        ) as handle:
+            handle.write(encoded)
+            handle.flush()
+            os.fsync(handle.fileno())
+            temporary_path = Path(handle.name)
+        os.replace(temporary_path, output)
+    finally:
+        if temporary_path and temporary_path.exists():
+            temporary_path.unlink()
 
 
 def git_revision(repo_root: Path, ref: str) -> str:
@@ -144,8 +180,7 @@ def export_public(
         stable=stable,
     )
     if output:
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        write_public_artifact(resolve_public_output(output), artifact)
     return artifact
 
 
@@ -155,7 +190,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--base", default="main")
     parser.add_argument("--head", default="HEAD")
     parser.add_argument("--command", action="append", dest="commands", required=True)
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--output",
+        type=Path,
+        help=f"Destination JSON path (defaults to ${PUBLIC_OUTPUT_ENV_VAR}).",
+    )
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--stable", action="store_true")
     return parser
@@ -164,17 +203,18 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        output = resolve_public_output(args.output)
         artifact = export_public(
             profile_name=args.profile,
             base=args.base,
             head=args.head,
             command_names=args.commands,
-            output=args.output,
+            output=output,
             stable=args.stable,
             timeout=args.timeout,
         )
     except (DemoExportError, RunBlocked, OSError) as exc:
         print(f"qa-agents export-public: {exc}", file=os.sys.stderr)
         return 2
-    print(json.dumps({"output": str(args.output), "status": artifact["run"]["status"]}, sort_keys=True))
+    print(json.dumps({"output": str(output), "status": artifact["run"]["status"]}, sort_keys=True))
     return 0

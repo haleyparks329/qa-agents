@@ -7,8 +7,12 @@ from pathlib import Path
 import pytest
 
 from qa_agents.kb import connect, list_execution_records
-from qa_agents.public_export import export_public, validate_public_artifact
+from qa_agents.demo_export import DemoExportError
+from qa_agents.public_export import export_public, resolve_public_output, validate_public_artifact
 from qa_agents.run import RunBlocked, load_and_validate_profile, run_evidence_loop
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def run_git(repo: Path, *args: str) -> None:
@@ -99,6 +103,20 @@ def test_required_target_paths_are_validated(tmp_path):
         load_and_validate_profile("personal_website", ["website_validation"], profiles_dir)
 
 
+def test_repository_profile_requires_target_environment(monkeypatch):
+    monkeypatch.delenv("QA_TARGET_REPO_ROOT", raising=False)
+
+    with pytest.raises(RunBlocked, match="required environment variable is missing: QA_TARGET_REPO_ROOT"):
+        load_and_validate_profile("personal_website", ["website_validation"])
+
+
+def test_repository_profile_rejects_missing_repository(tmp_path):
+    profiles_dir = make_profile(tmp_path, tmp_path / "missing-website")
+
+    with pytest.raises(RunBlocked, match="target repository does not exist"):
+        load_and_validate_profile("personal_website", ["website_validation"], profiles_dir)
+
+
 def test_command_only_run_persists_success_and_structured_gap(tmp_path, isolated_kb):
     repo = init_website_repo(tmp_path)
     profiles_dir = make_profile(tmp_path, repo)
@@ -176,3 +194,77 @@ def test_public_export_is_private_safe_and_stable(tmp_path, isolated_kb):
     assert first["coverage_gaps"][0]["type"] == "missing_browser_evidence"
     assert first["policy"]["autonomous_code_changes"] is False
     validate_public_artifact(first)
+
+
+def test_public_export_writes_configurable_external_destination(tmp_path, isolated_kb):
+    repo = init_website_repo(tmp_path)
+    profiles_dir = make_profile(tmp_path, repo)
+    output = tmp_path / "website" / "src/data/qa-agents/latest.json"
+
+    artifact = export_public(
+        profile_name="personal_website",
+        base="main",
+        head="HEAD",
+        command_names=["website_validation"],
+        output=output,
+        stable=True,
+        profiles_dir=profiles_dir,
+    )
+
+    assert json.loads(output.read_text(encoding="utf-8")) == artifact
+
+
+def test_public_output_uses_environment(monkeypatch, tmp_path):
+    output = tmp_path / "website/src/data/qa-agents/latest.json"
+    monkeypatch.setenv("QA_PUBLIC_ARTIFACT_OUTPUT", str(output))
+
+    assert resolve_public_output(None) == output
+
+
+def test_public_output_requires_configuration(monkeypatch):
+    monkeypatch.delenv("QA_PUBLIC_ARTIFACT_OUTPUT", raising=False)
+
+    with pytest.raises(DemoExportError, match="public artifact output is required"):
+        resolve_public_output(None)
+
+
+def test_public_output_rejects_directory(tmp_path):
+    with pytest.raises(DemoExportError, match="must be a file"):
+        resolve_public_output(tmp_path)
+
+
+def test_public_output_rejects_non_json_path(tmp_path):
+    with pytest.raises(DemoExportError, match="must use a .json extension"):
+        resolve_public_output(tmp_path / "latest.txt")
+
+
+def test_failed_export_preserves_existing_public_artifact(tmp_path, isolated_kb):
+    repo = init_website_repo(tmp_path)
+    profiles_dir = make_profile(tmp_path, repo)
+    (repo / "scripts/validate.py").write_text("raise SystemExit(1)\n", encoding="utf-8")
+    output = tmp_path / "website/src/data/qa-agents/latest.json"
+    output.parent.mkdir(parents=True)
+    previous = '{"status":"previous-valid-artifact"}\n'
+    output.write_text(previous, encoding="utf-8")
+
+    with pytest.raises(DemoExportError, match="evidence run failed"):
+        export_public(
+            profile_name="personal_website",
+            base="main",
+            head="HEAD",
+            command_names=["website_validation"],
+            output=output,
+            stable=True,
+            profiles_dir=profiles_dir,
+        )
+
+    assert output.read_text(encoding="utf-8") == previous
+
+
+def test_workflow_requires_all_runner_environment_variables():
+    workflow = (PROJECT_ROOT / ".github/workflows/website-evidence.yml").read_text(encoding="utf-8")
+
+    for name in ("QA_TARGET_REPO_ROOT", "QA_KB_PATH", "QA_PUBLIC_ARTIFACT_OUTPUT"):
+        assert f'${{{name}:?' in workflow
+    assert workflow.count("python -m qa_agents export-public") == 1
+    assert "npm run validate" not in workflow
