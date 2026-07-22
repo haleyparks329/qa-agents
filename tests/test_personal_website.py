@@ -267,4 +267,7 @@ def test_workflow_requires_all_runner_environment_variables():
     for name in ("QA_TARGET_REPO_ROOT", "QA_KB_PATH", "QA_PUBLIC_ARTIFACT_OUTPUT"):
         assert f'${{{name}:?' in workflow
     assert workflow.count("python -m qa_agents export-public") == 1
-    assert "npm run validate" not in workflow
+    assert "actions/setup-python" not in workflow
+    assert "/opt/homebrew/bin/python3.12 -m venv" in workflow
+    assert "pip install --no-deps ." in workflow
+    assert workflow.count("npm run validate") == 1
