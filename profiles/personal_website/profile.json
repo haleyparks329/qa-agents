@@ -1,0 +1,68 @@
+{
+  "name": "personal_website",
+  "repo_name": "haleyparks329.github.io",
+  "repo_root": "${QA_TARGET_REPO_ROOT}",
+  "app_description": "Haley's public interface connecting projects, architecture work, demos, and writing.",
+  "key_user_flows": [
+    "enter through the homepage and discover featured work",
+    "navigate between About, Projects, Writing, and project detail pages",
+    "open the QA Agents project and demo routes",
+    "follow internal links between project explanations, demos, and supporting pages",
+    "access external repository links",
+    "render the static site successfully for GitHub Pages"
+  ],
+  "risk_areas": [
+    "broken internal navigation",
+    "incorrect GitHub Pages base paths",
+    "missing generated routes",
+    "broken project or repository links",
+    "Astro build failures",
+    "malformed metadata",
+    "formatting drift",
+    "inaccessible or unclear interactive controls",
+    "responsive layout regressions",
+    "divergence between recorded demo claims and published artifacts"
+  ],
+  "test_priorities": [
+    "validate source formatting and Astro types",
+    "build every generated static route",
+    "validate internal links against production output",
+    "keep uncollected interaction and accessibility evidence explicit"
+  ],
+  "constraints": [
+    "preserve deterministic evidence",
+    "do not modify website source files during a QA run",
+    "do not publish secrets or local filesystem paths",
+    "do not claim browser coverage unless a browser actually ran",
+    "do not claim accessibility coverage unless an accessibility tool actually ran",
+    "treat successful build validation and rendered interaction validation as separate evidence types",
+    "autonomous code changes are not allowed",
+    "findings must remain traceable to commands, artifacts, or explicit missing evidence"
+  ],
+  "commands": {
+    "website_validation": "npm run validate"
+  },
+  "reports": {},
+  "artifacts": {
+    "production_build": "dist"
+  },
+  "analysis_mode": "command_only",
+  "known_evidence_gaps": [
+    {
+      "type": "missing_browser_evidence",
+      "summary": "The current run validates source integrity, build output, and internal links, but does not validate rendered interactions, accessibility, screenshots, or responsive layouts."
+    }
+  ],
+  "risk_area_mappings": {
+    "broken internal navigation": ["src/pages", "scripts/validate-links.mjs"],
+    "incorrect GitHub Pages base paths": ["astro.config.ts"],
+    "missing generated routes": ["src/pages"],
+    "Astro build failures": ["src", "astro.config.ts"],
+    "formatting drift": ["src"]
+  },
+  "validation": {
+    "required_paths": ["package.json", "astro.config.ts", "src/pages"],
+    "required_reports_after_run": [],
+    "required_artifacts_after_run": ["dist"]
+  }
+}

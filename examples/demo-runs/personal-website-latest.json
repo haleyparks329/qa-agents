@@ -1,0 +1,35 @@
+{
+  "commands": [
+    {
+      "duration_ms": 0,
+      "exit_code": 0,
+      "name": "website_validation",
+      "status": "passed"
+    }
+  ],
+  "coverage_gaps": [
+    {
+      "summary": "The current run validates source integrity, build output, and internal links, but does not validate rendered interactions, accessibility, screenshots, or responsive layouts.",
+      "type": "missing_browser_evidence"
+    }
+  ],
+  "findings": [],
+  "policy": {
+    "action": "published_review_evidence",
+    "autonomous_code_changes": false,
+    "outcome": "acted"
+  },
+  "run": {
+    "base": "main",
+    "commit": "9da720112b643ba4237fa94a09ca90b4f4255218",
+    "completed_at": null,
+    "head": "HEAD",
+    "started_at": null,
+    "status": "passed_with_gaps"
+  },
+  "schema_version": "1.0",
+  "target": {
+    "profile": "personal_website",
+    "repository": "haleyparks329.github.io"
+  }
+}

@@ -200,6 +200,49 @@ python3 -m qa_agents export-demo \
   --stable
 ```
 
+## Personal Website Dogfooding
+
+QA Agents can now run against the real `haleyparks329.github.io` portfolio repository. The deterministic layer executes the website's own `npm run validate` command, which covers Prettier formatting, Astro checks, the production build, and internal-link validation. The command and its normalized evidence are persisted before any gap routing occurs.
+
+This phase does not continuously monitor the site. It also does not run a browser, accessibility tooling, screenshots, or responsive rendering checks; those remain an explicit `missing_browser_evidence` gap routed to Beacon for advisory scoping. No LLM interprets raw terminal output and no autonomous source modification occurs.
+
+The public-safe result at [`examples/demo-runs/personal-website-latest.json`](examples/demo-runs/personal-website-latest.json) is intended to power a future live status display. Regenerate it locally without writing state into either public repository:
+
+```bash
+export QA_TARGET_REPO_ROOT=/path/to/haleyparks329.github.io
+export QA_KB_PATH=/tmp/qa-agents-personal-website.db
+
+.venv/bin/python -m qa_agents export-public \
+  --profile personal_website \
+  --base main \
+  --head HEAD \
+  --command website_validation \
+  --output examples/demo-runs/personal-website-latest.json \
+  --stable
+```
+
+### Self-hosted evidence automation
+
+`.github/workflows/website-evidence.yml` runs the same deterministic export after pushes to `main` or a manual `workflow_dispatch`. It requires a persistent macOS self-hosted runner at version 2.329.0 or newer (for the Node 24-based action versions) and does not install, register, or administer that runner.
+
+Configure these GitHub Actions repository variables:
+
+- `QA_TARGET_REPO_ROOT`: absolute path to the persistent website checkout.
+- `QA_KB_PATH`: absolute path to the SQLite evidence database outside either public repository.
+- `QA_PUBLIC_ARTIFACT_OUTPUT`: absolute destination for the public JSON artifact. For the portfolio, use `<website>/src/data/qa-agents/latest.json` so Astro can import it during a build.
+
+A recommended runner layout is:
+
+```text
+~/Projects/
+  QA Agents/                  workflow checkout managed by GitHub Actions
+  haleyparks329.github.io/    persistent external target repository
+~/Library/Application Support/QA Agents/
+  qa.db                       persistent inspectable evidence
+```
+
+The workflow checks out and installs QA Agents, but it does not duplicate runner logic in YAML. QA Agents validates the external repository, persists raw inspectable execution evidence, and atomically replaces the public artifact only after a complete valid export. A validation or export failure exits nonzero and leaves the prior valid artifact untouched. The workflow does not commit, push, deploy, interpret evidence with an LLM, or modify website source beyond the configured generated JSON destination.
+
 ## Architecture
 
 ```text
@@ -220,6 +263,9 @@ profiles/
   saas_dashboard/
     profile.json        Generic public-safe app profile
     house-rules.md      Profile-specific conventions
+  personal_website/
+    profile.json        Real portfolio command-only evidence profile
+    house-rules.md      Website evidence and publication constraints
 
 schema/
   000_init.sql          Core graph-shaped KB schema
@@ -236,6 +282,7 @@ qa_agents/
   gap_detector.py       Artifact-driven gap detector
   run.py                Deterministic target-repo evidence runner
   demo_export.py        Public-safe evidence artifact exporter
+  public_export.py      Stable public status artifact exporter
   cli.py                Small Beacon prototype runner
   generator.py          Prototype QA plan generator
 ```
