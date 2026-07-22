@@ -69,6 +69,9 @@ The Meticulous-inspired strategy is a simulated exploration based on public
 concepts. It demonstrates how agents can reason over replay evidence without
 replacing or weakening the deterministic execution layer.
 
+Read the public case study:
+[Meticulous-inspired QA investigation](https://haleyparks329.github.io/projects/qa-agents/meticulous/).
+
 For the design rationale behind profiles, strategies, evidence handling,
 workflow clustering, and policy-constrained decisions, see
 [Quality Strategy Architecture](docs/strategy-architecture.md).
