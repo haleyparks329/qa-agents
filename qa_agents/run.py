@@ -41,13 +41,17 @@ class RunBlocked(Exception):
 @dataclass(frozen=True)
 class ResolvedProfile:
     name: str
+    repo_name: str
     repo_root: Path
     commands: dict[str, str]
     reports: dict[str, str]
     artifacts: dict[str, str]
     required_paths: list[str]
     required_reports_after_run: list[str]
+    required_artifacts_after_run: list[str]
     risk_area_mappings: dict[str, list[str]]
+    analysis_mode: str
+    known_evidence_gaps: list[dict[str, str]]
 
 
 def utc_now() -> str:
@@ -151,7 +155,8 @@ def load_and_validate_profile(
         raise RunBlocked("profile field 'validation' must be an object")
     required_paths = _string_list(validation, "required_paths")
     required_reports_after_run = _string_list(validation, "required_reports_after_run")
-    for path_value in [*required_paths, *required_reports_after_run]:
+    required_artifacts_after_run = _string_list(validation, "required_artifacts_after_run")
+    for path_value in [*required_paths, *required_reports_after_run, *required_artifacts_after_run]:
         ensure_relative_safe(path_value, "validation path")
     missing_paths = [path_value for path_value in required_paths if not (repo_root / path_value).exists()]
     if missing_paths:
@@ -170,15 +175,33 @@ def load_and_validate_profile(
             ensure_relative_safe(path_value, "risk_area_mappings path")
         risk_area_mappings[risk_area] = paths
 
+    analysis_mode = data.get("analysis_mode", "python_coverage")
+    if analysis_mode not in {"python_coverage", "command_only"}:
+        raise RunBlocked("profile field 'analysis_mode' must be 'python_coverage' or 'command_only'")
+    raw_known_gaps = data.get("known_evidence_gaps", [])
+    if not isinstance(raw_known_gaps, list):
+        raise RunBlocked("profile field 'known_evidence_gaps' must be a list")
+    known_evidence_gaps: list[dict[str, str]] = []
+    for gap in raw_known_gaps:
+        if not isinstance(gap, dict) or not all(
+            isinstance(gap.get(key), str) and gap[key] for key in ("type", "summary")
+        ):
+            raise RunBlocked("known evidence gaps require non-empty 'type' and 'summary' strings")
+        known_evidence_gaps.append({"type": gap["type"], "summary": gap["summary"]})
+
     return ResolvedProfile(
         name=str(data.get("name", profile_name)),
+        repo_name=str(data.get("repo_name", profile_name)),
         repo_root=repo_root,
         commands=commands,
         reports=reports,
         artifacts=artifacts,
         required_paths=required_paths,
         required_reports_after_run=required_reports_after_run,
+        required_artifacts_after_run=required_artifacts_after_run,
         risk_area_mappings=risk_area_mappings,
+        analysis_mode=analysis_mode,
+        known_evidence_gaps=known_evidence_gaps,
     )
 
 
@@ -256,6 +279,15 @@ def run_command(profile: ResolvedProfile, command_name: str, timeout: int) -> di
             status = "missing_report"
             stderr_summary = bounded(f"missing required reports: {', '.join(missing_reports)}")
             artifact_refs, report_refs = command_refs(profile, command_name)
+        missing_artifacts = [
+            path_value
+            for path_value in profile.required_artifacts_after_run
+            if not (profile.repo_root / path_value).exists()
+        ]
+        if missing_artifacts:
+            status = "missing_artifact"
+            stderr_summary = bounded(f"missing required artifacts: {', '.join(missing_artifacts)}")
+            artifact_refs, report_refs = command_refs(profile, command_name)
 
     return {
         "command_name": command_name,
@@ -313,7 +345,7 @@ def _status_to_exit(statuses: list[str], run_status: str) -> int:
         return 3
     if "failed" in statuses:
         return 1
-    if any(status in statuses for status in {"missing_command", "missing_report", "blocked"}):
+    if any(status in statuses for status in {"missing_command", "missing_report", "missing_artifact", "blocked"}):
         return 2
     return 0
 
@@ -368,7 +400,7 @@ def run_evidence_loop(
         files = changed_files(profile.repo_root, base, head)
         summary["changed_files"] = files
         relevant_files = [file_path for file_path in files if file_path.endswith(".py")]
-        if not relevant_files:
+        if profile.analysis_mode == "python_coverage" and not relevant_files:
             record_observation("abstained", "no relevant changed Python files", run_id, conn)
             finish_agent_run(run_id, "abstained", conn)
             summary["status"] = "abstained"
@@ -397,6 +429,25 @@ def run_evidence_loop(
             summary["status"] = status
             summary["recommended_next_action"] = "Fix deterministic evidence execution before routing QA work."
             return _status_to_exit(execution_statuses, status), summary
+
+        if profile.analysis_mode == "command_only":
+            gap_ids = [
+                record_gap(gap["type"], "", gap["summary"], conn)
+                for gap in profile.known_evidence_gaps
+            ]
+            routed = route_gaps(conn)
+            routed_by_id = {int(row["id"]): dict(row) for row in routed}
+            summary["gaps"] = [routed_by_id[gap_id] for gap_id in gap_ids if gap_id in routed_by_id]
+            summary["recommended_next_action"] = (
+                "Beacon should scope future evidence collection for the known coverage gaps."
+                if summary["gaps"]
+                else "No QA gap action is recommended for this run."
+            )
+            if summary["gaps"]:
+                record_observation("reviewable_next_action", summary["recommended_next_action"], run_id, conn)
+            finish_agent_run(run_id, "acted", conn)
+            summary["status"] = "acted"
+            return 0, summary
 
         coverage_report = profile.reports.get("coverage")
         if not coverage_report:

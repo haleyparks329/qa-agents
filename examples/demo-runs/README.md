@@ -12,6 +12,8 @@ configured unit command, records coverage evidence, persists a
 `missing_unit_test` gap, and recommends Scribe as the reviewable next action.
 No tests or patches are generated automatically.
 
+`personal-website-latest.json` is a stable, public-safe status artifact from a real run of the portfolio website's own validation command. Unlike the recorded Little Bytes scenario, it represents the latest target revision and exposes command outcomes plus explicit evidence gaps for a future status UI. Detailed command output and local paths remain only in the persisted QA database.
+
 Regenerate the stable artifact from the `qa-agents` repository with:
 
 ```bash
