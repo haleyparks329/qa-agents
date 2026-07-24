@@ -5,6 +5,7 @@ import json
 import os
 import subprocess
 import tempfile
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +15,7 @@ from .profiles import DEFAULT_PROFILES_DIR
 from .run import RunBlocked, load_and_validate_profile, run_evidence_loop
 
 
-PUBLIC_SCHEMA_VERSION = "1.0"
+PUBLIC_SCHEMA_VERSION = "1.1"
 MAX_PUBLIC_ARTIFACT_BYTES = 20_000
 PUBLIC_OUTPUT_ENV_VAR = "QA_PUBLIC_ARTIFACT_OUTPUT"
 
@@ -62,8 +63,34 @@ def git_revision(repo_root: Path, ref: str) -> str:
     return result.stdout.strip()
 
 
+def require_clean_checkout(repo_root: Path) -> None:
+    result = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise DemoExportError(result.stderr.strip() or "could not inspect target checkout")
+    if result.stdout.strip():
+        raise DemoExportError("target checkout has uncommitted changes")
+
+
+def qa_agents_version(build: str | None = None) -> str:
+    if build:
+        return build
+    try:
+        return version("qa-agents")
+    except PackageNotFoundError:
+        return "development"
+
+
 def validate_public_artifact(artifact: dict[str, Any]) -> None:
-    required = {"schema_version", "target", "run", "commands", "findings", "coverage_gaps", "policy"}
+    required = {
+        "schema_version", "producer", "target", "run", "commands",
+        "findings", "coverage_gaps", "policy"
+    }
     missing = sorted(required.difference(artifact))
     if missing:
         raise DemoExportError(f"public artifact is missing required fields: {', '.join(missing)}")
@@ -82,6 +109,9 @@ def validate_public_artifact(artifact: dict[str, Any]) -> None:
                 visit(item)
 
     visit(artifact)
+    producer = artifact.get("producer")
+    if not isinstance(producer, dict) or not isinstance(producer.get("version"), str):
+        raise DemoExportError("public artifact producer.version is required")
     reject_absolute_or_private_strings(artifact)
     if len(json.dumps(artifact, sort_keys=True).encode("utf-8")) > MAX_PUBLIC_ARTIFACT_BYTES:
         raise DemoExportError("public artifact is too large")
@@ -95,6 +125,7 @@ def build_public_artifact(
     base: str,
     head: str,
     commit: str,
+    producer_version: str,
     stable: bool = False,
 ) -> dict[str, Any]:
     if summary.get("status") != "acted":
@@ -116,6 +147,7 @@ def build_public_artifact(
     completed_at = None if stable else max((record["finished_at"] for record in executions), default=None)
     artifact = {
         "schema_version": PUBLIC_SCHEMA_VERSION,
+        "producer": {"name": "qa-agents", "version": producer_version},
         "target": {"profile": summary["profile"], "repository": repository},
         "run": {
             "status": "passed_with_gaps" if gaps else "passed",
@@ -148,8 +180,22 @@ def export_public(
     stable: bool = False,
     timeout: int = 120,
     profiles_dir: Path = DEFAULT_PROFILES_DIR,
+    target_path: Path | None = None,
+    repository: str | None = None,
+    commit: str | None = None,
+    producer_version: str | None = None,
 ) -> dict[str, Any]:
-    profile = load_and_validate_profile(profile_name, command_names, profiles_dir)
+    profile = load_and_validate_profile(
+        profile_name, command_names, profiles_dir, target_path=target_path
+    )
+    actual_commit = git_revision(profile.repo_root, "HEAD")
+    require_clean_checkout(profile.repo_root)
+    if commit is not None:
+        supplied_commit = git_revision(profile.repo_root, commit)
+        if supplied_commit != actual_commit:
+            raise DemoExportError(
+                f"target checkout mismatch: HEAD is {actual_commit}, supplied commit is {supplied_commit}"
+            )
     code, summary = run_evidence_loop(
         profile_name=profile_name,
         base=base,
@@ -157,6 +203,7 @@ def export_public(
         command_names=command_names,
         timeout=timeout,
         profiles_dir=profiles_dir,
+        target_path=profile.repo_root,
     )
     if code != 0:
         raise DemoExportError(f"evidence run failed with exit code {code}: {summary.get('recommended_next_action')}")
@@ -173,10 +220,11 @@ def export_public(
     artifact = build_public_artifact(
         summary=summary,
         executions=executions,
-        repository=profile.repo_name,
+        repository=repository or profile.repo_name,
         base=base,
         head=head,
-        commit=git_revision(profile.repo_root, head),
+        commit=actual_commit,
+        producer_version=qa_agents_version(producer_version),
         stable=stable,
     )
     if output:
@@ -187,6 +235,9 @@ def export_public(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run evidence collection and export a public-safe artifact.")
     parser.add_argument("--profile", required=True)
+    parser.add_argument("--target-path", type=Path, required=True)
+    parser.add_argument("--repository", required=True)
+    parser.add_argument("--commit", required=True)
     parser.add_argument("--base", default="main")
     parser.add_argument("--head", default="HEAD")
     parser.add_argument("--command", action="append", dest="commands", required=True)
@@ -197,6 +248,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--stable", action="store_true")
+    parser.add_argument("--producer-version")
     return parser
 
 
@@ -212,6 +264,10 @@ def main(argv: list[str] | None = None) -> int:
             output=output,
             stable=args.stable,
             timeout=args.timeout,
+            target_path=args.target_path,
+            repository=args.repository,
+            commit=args.commit,
+            producer_version=args.producer_version,
         )
     except (DemoExportError, RunBlocked, OSError) as exc:
         print(f"qa-agents export-public: {exc}", file=os.sys.stderr)

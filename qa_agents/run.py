@@ -119,6 +119,7 @@ def load_and_validate_profile(
     profile_name: str,
     command_names: list[str],
     profiles_dir: Path = DEFAULT_PROFILES_DIR,
+    target_path: Path | None = None,
 ) -> ResolvedProfile:
     try:
         data = load_profile_data(profile_name, profiles_dir)
@@ -130,9 +131,12 @@ def load_and_validate_profile(
         raise RunBlocked(f"profile '{profile_name}' is missing fields: {', '.join(missing)}")
 
     repo_root_raw = data.get("repo_root")
-    if not isinstance(repo_root_raw, str) or not repo_root_raw:
-        raise RunBlocked("profile field 'repo_root' is required")
-    repo_root = resolve_repo_root(repo_root_raw)
+    if target_path is not None:
+        repo_root = target_path.expanduser().resolve()
+    else:
+        if not isinstance(repo_root_raw, str) or not repo_root_raw:
+            raise RunBlocked("profile field 'repo_root' is required when --target-path is omitted")
+        repo_root = resolve_repo_root(repo_root_raw)
     if not repo_root.exists() or not repo_root.is_dir():
         raise RunBlocked(f"target repository does not exist: {repo_root}")
 
@@ -364,9 +368,12 @@ def run_evidence_loop(
     timeout: int = 120,
     dry_run: bool = False,
     profiles_dir: Path = DEFAULT_PROFILES_DIR,
+    target_path: Path | None = None,
 ) -> tuple[int, dict[str, Any]]:
     command_names = command_names or ["unit"]
-    profile = load_and_validate_profile(profile_name, command_names, profiles_dir)
+    profile = load_and_validate_profile(
+        profile_name, command_names, profiles_dir, target_path=target_path
+    )
     summary: dict[str, Any] = {
         "profile": profile.name,
         "target_repo": str(profile.repo_root),

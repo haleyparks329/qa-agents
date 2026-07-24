@@ -1,5 +1,38 @@
 # QA Agents
 
+> QA Agents owns evidence generation. Consumers own publication.
+
+## Consumer review contract
+
+QA Agents runs deterministic profile commands against a consumer-provided
+checkout and writes one public-safe JSON artifact to a consumer-provided path.
+It does not commit that artifact, open pull requests, schedule consumer reviews,
+or deploy consumer applications.
+
+```bash
+qa-agents review \
+  --profile personal_website \
+  --target-path /absolute/path/to/checkout \
+  --repository owner/repository \
+  --commit "$GITHUB_SHA" \
+  --base "$GITHUB_SHA" \
+  --head "$GITHUB_SHA" \
+  --command website_validation \
+  --producer-version "$PINNED_QA_AGENTS_REF" \
+  --output /absolute/path/to/latest.json
+```
+
+`--target-path`, `--repository`, `--commit`, and `--output` form the stable
+consumer boundary. The exporter verifies that the checkout's `HEAD` resolves to
+the supplied commit before running. A mismatch, failed command, missing required
+artifact, unsafe output, or invalid export exits nonzero. The output is replaced
+atomically only after a complete valid review.
+
+QA Agents owns schema versioning in
+`schemas/public-artifact.schema.json`. Schema `1.1` records both the reviewed
+repository commit and the QA Agents producer version. Consumer presentation and
+production-only provenance requirements remain consumer concerns.
+
 QA agent infrastructure for auditing, probing, scoping, healing, and test
 authoring across software repos.
 
@@ -203,48 +236,17 @@ python3 -m qa_agents export-demo \
   --stable
 ```
 
-## Personal Website Dogfooding
+## Personal Website Profile
 
-QA Agents can now run against the real `haleyparks329.github.io` portfolio repository. The deterministic layer executes the website's own `npm run validate` command, which covers Prettier formatting, Astro checks, the production build, and internal-link validation. The command and its normalized evidence are persisted before any gap routing occurs.
+The `personal_website` profile describes deterministic review behavior for an
+Astro portfolio: it runs the consumer's validation command and preserves the
+known absence of browser, accessibility, screenshot, and responsive-layout
+evidence as a coverage gap. The profile does not schedule reviews or identify a
+publication destination.
 
-This phase does not continuously monitor the site. It also does not run a browser, accessibility tooling, screenshots, or responsive rendering checks; those remain an explicit `missing_browser_evidence` gap routed to Beacon for advisory scoping. No LLM interprets raw terminal output and no autonomous source modification occurs.
-
-The public-safe result at [`examples/demo-runs/personal-website-latest.json`](examples/demo-runs/personal-website-latest.json) is intended to power a future live status display. Regenerate it locally without writing state into either public repository:
-
-```bash
-export QA_TARGET_REPO_ROOT=/path/to/haleyparks329.github.io
-export QA_KB_PATH=/tmp/qa-agents-personal-website.db
-
-.venv/bin/python -m qa_agents export-public \
-  --profile personal_website \
-  --base main \
-  --head HEAD \
-  --command website_validation \
-  --output examples/demo-runs/personal-website-latest.json \
-  --stable
-```
-
-### Self-hosted evidence automation
-
-`.github/workflows/website-evidence.yml` runs the same deterministic export after pushes to `main` or a manual `workflow_dispatch`. It requires a persistent macOS self-hosted runner at version 2.329.0 or newer (for the Node 24-based action versions) and does not install, register, or administer that runner.
-
-Configure these GitHub Actions repository variables:
-
-- `QA_TARGET_REPO_ROOT`: absolute path to the persistent website checkout.
-- `QA_KB_PATH`: absolute path to the SQLite evidence database outside either public repository.
-- `QA_PUBLIC_ARTIFACT_OUTPUT`: absolute destination for the public JSON artifact. For the portfolio, use `<website>/src/data/qa-agents/latest.json` so Astro can import it during a build.
-
-A recommended runner layout is:
-
-```text
-~/Projects/
-  QA Agents/                  workflow checkout managed by GitHub Actions
-  haleyparks329.github.io/    persistent external target repository
-~/Library/Application Support/QA Agents/
-  qa.db                       persistent inspectable evidence
-```
-
-The workflow checks out and installs QA Agents, but it does not duplicate runner logic in YAML. QA Agents validates the external repository, persists raw inspectable execution evidence, and atomically replaces the public artifact only after a complete valid export. A validation or export failure exits nonzero and leaves the prior valid artifact untouched. The workflow does not commit, push, deploy, interpret evidence with an LLM, or modify website source beyond the configured generated JSON destination.
+The website repository invokes the generic `qa-agents review` contract during
+its own deployment. This repository has no workflow, token, branch, commit,
+pull-request, source-tree, or GitHub Pages responsibility for that publication.
 
 ## Architecture
 

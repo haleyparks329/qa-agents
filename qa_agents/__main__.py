@@ -9,13 +9,17 @@ from .public_export import main as export_public_main
 from .run import main as run_main
 
 
-if __name__ == "__main__":
+def main() -> int:
     if len(sys.argv) > 1 and sys.argv[1] == "investigate":
-        raise SystemExit(investigate_main(sys.argv[2:]))
+        return investigate_main(sys.argv[2:])
     if len(sys.argv) > 1 and sys.argv[1] == "run":
-        raise SystemExit(run_main(sys.argv[2:]))
+        return run_main(sys.argv[2:])
     if len(sys.argv) > 1 and sys.argv[1] == "export-demo":
-        raise SystemExit(export_demo_main(sys.argv[2:]))
-    if len(sys.argv) > 1 and sys.argv[1] == "export-public":
-        raise SystemExit(export_public_main(sys.argv[2:]))
-    raise SystemExit(planner_main())
+        return export_demo_main(sys.argv[2:])
+    if len(sys.argv) > 1 and sys.argv[1] in {"review", "export-public"}:
+        return export_public_main(sys.argv[2:])
+    return planner_main()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

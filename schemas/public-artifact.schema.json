@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/haleyparks329/qa-agents/schemas/public-artifact.schema.json",
+  "title": "QA Agents public review artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "producer", "target", "run", "commands", "findings", "coverage_gaps", "policy"],
+  "properties": {
+    "schema_version": { "const": "1.1" },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "const": "qa-agents" },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "repository"],
+      "properties": {
+        "profile": { "type": "string", "minLength": 1 },
+        "repository": { "type": "string", "minLength": 1 }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "base", "head", "commit", "started_at", "completed_at"],
+      "properties": {
+        "status": { "enum": ["passed", "passed_with_gaps"] },
+        "base": { "type": "string" },
+        "head": { "type": "string" },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "started_at": { "type": ["string", "null"], "format": "date-time" },
+        "completed_at": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status", "exit_code", "duration_ms"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "status": { "const": "passed" },
+          "exit_code": { "const": 0 },
+          "duration_ms": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "findings": { "type": "array" },
+    "coverage_gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "summary"],
+        "properties": {
+          "type": { "type": "string", "minLength": 1 },
+          "summary": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "action", "autonomous_code_changes"],
+      "properties": {
+        "outcome": { "type": "string", "minLength": 1 },
+        "action": { "type": "string", "minLength": 1 },
+        "autonomous_code_changes": { "const": false }
+      }
+    }
+  }
+}

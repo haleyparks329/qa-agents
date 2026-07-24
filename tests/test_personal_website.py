@@ -24,6 +24,7 @@ def init_website_repo(tmp_path: Path) -> Path:
     (repo / "src/pages").mkdir(parents=True)
     (repo / "scripts").mkdir()
     (repo / "package.json").write_text('{"name":"fixture"}\n', encoding="utf-8")
+    (repo / ".gitignore").write_text("dist/\n", encoding="utf-8")
     (repo / "astro.config.ts").write_text("export default {}\n", encoding="utf-8")
     (repo / "src/pages/index.astro").write_text("<h1>Home</h1>\n", encoding="utf-8")
     (repo / "scripts/validate.py").write_text(
@@ -212,6 +213,70 @@ def test_public_export_writes_configurable_external_destination(tmp_path, isolat
     )
 
     assert json.loads(output.read_text(encoding="utf-8")) == artifact
+    assert artifact["producer"]["name"] == "qa-agents"
+
+
+def test_public_export_accepts_consumer_target_and_repository(tmp_path, isolated_kb):
+    repo = init_website_repo(tmp_path)
+    profiles_dir = make_profile(tmp_path, tmp_path / "unused")
+    output = tmp_path / "consumer-artifacts" / "review.json"
+    commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=repo, check=True, capture_output=True, text=True
+    ).stdout.strip()
+
+    artifact = export_public(
+        profile_name="personal_website",
+        base=commit,
+        head=commit,
+        command_names=["website_validation"],
+        target_path=repo,
+        repository="example/another-consumer",
+        commit=commit,
+        output=output,
+        profiles_dir=profiles_dir,
+    )
+
+    assert artifact["target"]["repository"] == "example/another-consumer"
+    assert artifact["run"]["commit"] == commit
+    assert output.exists()
+
+
+def test_public_export_rejects_checkout_commit_mismatch(tmp_path, isolated_kb):
+    repo = init_website_repo(tmp_path)
+    profiles_dir = make_profile(tmp_path, repo)
+    (repo / "README.md").write_text("second revision\n", encoding="utf-8")
+    run_git(repo, "add", "README.md")
+    run_git(repo, "commit", "-m", "second revision")
+
+    with pytest.raises(DemoExportError, match="target checkout mismatch"):
+        export_public(
+            profile_name="personal_website",
+            base="HEAD",
+            head="HEAD",
+            command_names=["website_validation"],
+            target_path=repo,
+            repository="example/consumer",
+            commit="HEAD^",
+            profiles_dir=profiles_dir,
+        )
+
+
+def test_public_export_rejects_dirty_checkout(tmp_path, isolated_kb):
+    repo = init_website_repo(tmp_path)
+    profiles_dir = make_profile(tmp_path, repo)
+    (repo / "package.json").write_text('{"name":"changed"}\n', encoding="utf-8")
+
+    with pytest.raises(DemoExportError, match="uncommitted changes"):
+        export_public(
+            profile_name="personal_website",
+            base="HEAD",
+            head="HEAD",
+            command_names=["website_validation"],
+            target_path=repo,
+            repository="example/consumer",
+            commit="HEAD",
+            profiles_dir=profiles_dir,
+        )
 
 
 def test_public_output_uses_environment(monkeypatch, tmp_path):
@@ -242,6 +307,8 @@ def test_failed_export_preserves_existing_public_artifact(tmp_path, isolated_kb)
     repo = init_website_repo(tmp_path)
     profiles_dir = make_profile(tmp_path, repo)
     (repo / "scripts/validate.py").write_text("raise SystemExit(1)\n", encoding="utf-8")
+    run_git(repo, "add", "scripts/validate.py")
+    run_git(repo, "commit", "-m", "make validation fail")
     output = tmp_path / "website/src/data/qa-agents/latest.json"
     output.parent.mkdir(parents=True)
     previous = '{"status":"previous-valid-artifact"}\n'
@@ -261,13 +328,5 @@ def test_failed_export_preserves_existing_public_artifact(tmp_path, isolated_kb)
     assert output.read_text(encoding="utf-8") == previous
 
 
-def test_workflow_requires_all_runner_environment_variables():
-    workflow = (PROJECT_ROOT / ".github/workflows/website-evidence.yml").read_text(encoding="utf-8")
-
-    for name in ("QA_TARGET_REPO_ROOT", "QA_KB_PATH", "QA_PUBLIC_ARTIFACT_OUTPUT"):
-        assert f'${{{name}:?' in workflow
-    assert workflow.count("python -m qa_agents export-public") == 1
-    assert "actions/setup-python" not in workflow
-    assert "/opt/homebrew/bin/python3.12 -m venv" in workflow
-    assert "pip install --no-deps ." in workflow
-    assert workflow.count("npm run validate") == 1
+def test_qa_agents_does_not_own_consumer_publishing_workflow():
+    assert not (PROJECT_ROOT / ".github/workflows/website-evidence.yml").exists()
