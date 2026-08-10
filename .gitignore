@@ -1,16 +1,10 @@
 __pycache__/
 *.py[cod]
-*.egg-info/
 .pytest_cache/
-.coverage
-htmlcov/
 .venv/
-venv/
 dist/
 build/
 .DS_Store
 *.log
-qa_plan_output.md
 *.db
 *.sqlite
-.agents-state/

@@ -1,62 +1,22 @@
-# Demo
+# Little Bytes Pricing Investigation
 
-All demo data is simulated and public-safe.
+Little Bytes is a deliberately small bakery application used to produce understandable QA evidence.
 
-## Implemented: Beacon Prototype
+## Scenario
 
-The runnable planner is a small Beacon slice. It exists to show profile-aware
-QA scoping without claiming full agent orchestration.
+A pricing change alters how quantity and a percentage discount interact. Existing unit tests continue to pass because they do not cover that combination.
 
-```bash
-python -m qa_agents examples/feature_request.md --profile ecommerce
-```
+## Evidence
 
-With generic Playwright-style stubs:
+- the pricing behavior changed;
+- the configured unit tests passed;
+- the changed behavior had no direct regression evidence;
+- no browser run, generated test, patch, or merge occurred.
 
-```bash
-python -m qa_agents examples/feature_request.md --profile ecommerce --stubs
-```
+## Investigation outcome
 
-Save the plan:
+The result is **acted** because the available evidence supports recording a coverage gap and suggesting a narrow next action. The suggestion is to add a human-reviewed regression example for quantity plus discount behavior.
 
-```bash
-python -m qa_agents examples/feature_request.md --profile ecommerce --stubs --output qa_plan_output.md
-```
+If the test artifact had been missing, the investigation would be **blocked**. If the requested action required authority outside the role, it would **abstain**.
 
-## Implemented: Profile Context
-
-```bash
-python3 profile.py --profile ecommerce agent-context beacon
-python3 profile.py --profile ecommerce agent-context gap-detector
-```
-
-## Implemented: KB And Gap Records
-
-```bash
-export QA_KB_PATH=/tmp/qa-agents-demo.db
-python3 kb.py migrate
-python3 kb.py stats
-python3 gap_detector.py --base origin/main --head HEAD --route
-python3 kb.py query gaps
-python3 kb.py route-gaps
-```
-
-## Prototype Output Shape
-
-The Beacon prototype output includes:
-
-- selected profile
-- parsed feature summary and requirements
-- deterministic test cases
-- test type classifications
-- risk notes
-- automation candidates
-- optional generic Playwright-style stubs
-
-## Planned Demos
-
-- Live dashboard or tracker.
-- Digest workflow.
-- Playwright healing.
-- Browser probing.
-- Automated multi-agent handoffs.
+The [static artifact](../examples/demo-runs/little-bytes-pricing.json) is deliberately not a stable schema or runtime export contract.
